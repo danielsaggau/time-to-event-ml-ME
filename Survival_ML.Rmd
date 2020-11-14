@@ -24,7 +24,6 @@ To accommodate the censored nature of our data, we need to introduce different e
 This paper will introduce a number of methods, focusing on the brier score and the c-index, two methods that have gained prominence within the realms of scholarship and among clinicians.
 
 
-
 The paper is structured as follows:
 Firstly, i will introduce the integrated brier score, providing further information on the origin, theoretical underpinning and the respective characteristics.
 Secondly, i will introduce the c-index, following the same procedure as with the integrated brier score.
@@ -106,6 +105,8 @@ Structure:
 
 ### Conclusion 
 
+* Suggests that one limitation of (index of prediction accuracy; aka calibrated brier score) IPA is that measure using average performance may not reflect improvements that affect a small subset of the population. 
+* Competing risks are mentioned; claim that two patients may have different clinical decisions even when exact same predicted risk of particular event (competing risks)
 
 
 
@@ -115,9 +116,23 @@ Structure:
 
 ### Introduction 
 
+Accuracy of models can be assessed via calibration and discrimination. 
+**Calibration**: Measure how well predicted probabilities agree with actual observed risk. (prediction develop disease vs actual actual of disease)
+**Discrimination**: Measure of how well model can separate those who do and do not have disease of interest.(when predicts values for cases are all higher than for non-cases, we have perfect discrimination even when predicted risk does not match the proportion with disease)
+* Discrimination is more interesting when we have a classification problem with patients that have and dont have prevalent disease (e.g. diagnostic testing). 
+* Discrimination is measured by c-statistics/ROC
+
+But when dealing with predictive/prognostic modeling, we need measures that calibrate and discriminate such as the brier score/R^2 and likelihood statistics.
+* **Problem**: Risk prediction models in cardiovascular literature, use c-statistic, despite working with large prospective cohort studies. 
+
+
+### ROC Curve and c Statistic 
+
 * Sensitivity and specificity can be influenced e.g.
 * sensitivity among molder cases of disease 
 * specificity can depend on characteristics of non-cases, e.g. gender, age or prevalence of concomitant risk factors 
+
+
 
 
 ### Conclusion 
@@ -289,7 +304,13 @@ P.Wang 2017 ML for SA
 
 # Conclusion
 
+What is the problem?
 
+Why is one method worse?
+
+What is the solution?
+
+Advice for pratical implementation?
 
 
 
