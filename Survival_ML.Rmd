@@ -21,7 +21,7 @@ Time to event studies:
 
 To accommodate the censored nature of our data, we need to introduce different evaluation metrics. 
 
-This paper will introduce a number of methods, focusing on the brier score and the c-index, two methods that have gained prominence within the realms of scholarship and amongst clinicians.
+This paper will introduce a number of methods, focusing on the brier score and the c-index, two methods that have gained prominence within the realms of scholarship and among clinicians.
 
 
 
