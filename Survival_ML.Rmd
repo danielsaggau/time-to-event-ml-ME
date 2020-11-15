@@ -15,22 +15,27 @@ knitr::opts_chunk$set(echo = TRUE)
 Time to event studies:
 
 * What is a time to event study?
-* What problems does it create?
-* Why do we need specific model evaluation metrics?
 
+Time to event studies have gained prominence in a variety of fields, but predominately found audience within the field of medical research.
+Nevertheless, areas of application are manifold and include e.g. financial statistics, examining the survival of an institution. 
+One feature of time to event studies is the unique data structure.
+A common characteristic of survival data is the right censored nature of observations.
+Right censored data means that not every subject in the study experiences the event of interest.
+The reasons for that can be various but one frequent reason for this is that the study ends prior to the event occurring.
+But this could also happen because we have subjects dropping out of our study, which might not be a common feature in financial statistics but occurs with considerable frequency in clinical or epidemiological studies. 
+Due to this data structure, model evaluation tools face the challenge of (XXX)
 
-To accommodate the censored nature of our data, we need to introduce different evaluation metrics. 
+Generally speaking, there are various model evaluation metrics.
+The model choice is heavily dependent on the task at hand.
+One way to categories models is e.g. separating them by diagnostic and prognostic.
 
-This paper will introduce a number of methods, focusing on the brier score and the c-index, two methods that have gained prominence within the realms of scholarship and among clinicians.
-
-
-Generally speaking, both measures, the c-index and the integrated brier score have their respective advantages.
+One distinguishes between discrimination, calibration, 
+Two prominent tools are the Receiver Operating Characteristic Curve or in short the ROC, and the c-statistics.
+This paper will introduce a number of methods, focusing on popular extensions of these prominent tools adjusted for survival studies namely the brier score and the c-index, two methods that have gained prominence within the realms of scholarship and among clinicians.
+Generally speaking, both measures, the c-index and the integrated brier score have their respective advantages and their unique merits have let these methods gained more attention than other methods.
 While the c-index does enjoy considerably prominence among clinicians due to interpretability and the ability to make comprehensive conclusions for the individual patients.
 Irrespective, the c-index only considers discrimination and does not account for calibration as an evaluation criterion which i will argue is a pivotal shortcoming when assessing different prognostic models and especially when working with machine learning methods in time to event studies.
 Inevitably, this paper suggests that the integrated brier score is the more holistic model evaluation metric from the stance of a statistician. 
-
-
-
 
 
 The paper is structured as follows:
@@ -39,6 +44,10 @@ Secondly, i will introduce the c-index, following the same procedure as with the
 Following the analysis of these two cornerstones of model evaluation for time to event studies, i will illustrate further competing methods and current research within the field. 
 Subsequently, the fourth section will provide a brief example of how to implement given methods in R.
 Lastly, the conclusion will summarize core findings of this brief comparative study. 
+
+# Traditional Model Evalution Metrics 
+
+
 
 
 # Performance Evaluation metrics 
@@ -117,15 +126,27 @@ Structure:
 * Competing risks are mentioned; claim that two patients may have different clinical decisions even when exact same predicted risk of particular event (competing risks)
 
 
+## Gerds, T. A., & Schumacher, M. (2006). Consistent estimation of the expected Brier score in general survival models with right‐censored event times
 
+### Introduction 
 
+* Traditionally, statisticians quantify how close prediction is to the actual outcome, using the R squared and the Brier score.
+* Calibration can be measured by e.g. Hosmer Lemeshow "goodness of fit" test. 
+* Discrimination can be quantified (do patients who have outcome have higher risk predictions than those who dont) using measures such as sensitivtiy , specificity, and area under the ROC (or concordance statistic)
+* New methods to assess prediction have gained attention such as reclassifcation tables, net reclassification improvement (NRI), integrated discrimination improvement (IDI), decision curves based on decision analytic measures( due to novelty not as applied and as common.
 
+### Conclusion 
 
+*
+*
+*
 
 
 
 
 ```{r}
+
+## See Andreas Bender Survival Analysis Model Evaluation
 library(dplyr)
 library(mgcv)
 library(pammtools)
@@ -220,14 +241,15 @@ But when dealing with predictive/prognostic modeling, we need measures that cali
 
 * Common method to assess risk is to work with relative rather than absolute risk.
 * C- index works with concordance probability 
-*
 
 ## Antolini et al. 2005 A time-dependent discrimination index for survival data
+
+
+### Introduction 
 
 * Extension ROC for censored data, with its biggest advantage being the interpretability 
 * Suggest time dependent discrimination index 
 * Ability to discriminate is summarized over time
-* Grounded in following assumption: A subject who developed event should have less predicted probability of surviving beyond his survival time than any subject who survived longer 
 * Prediction is focused on the individual outcome hence argue focus on accuracy of the predictions, rather than merely on the covarate effects and their statistical significance 
 * Argue that **generalizability** is important and contains two levels:
 * reproducability: Patients from same population  
@@ -241,9 +263,12 @@ But when dealing with predictive/prognostic modeling, we need measures that cali
 * Generally speaking, if there is a one to one correspondence between predicted times and predicted survival functions, the ranking between predicted times can be obtained by opposite ranking of predicted survival prob at any fixed time point
 * Using non-proportional hazard model for breast cancer patients 
 
+### Conclusion 
 
-
-
+* The core of model development is developing suitable outcome prediction, given the availability of appropriate measures of model predictive accuracy, to evaluate the generealizability to new patients of different prognostic models or to judge the relevance of addtional contributions of new covariates. 
+* Discrimination measure that is established is the ROC and the c-index is an extension for right censored survival data (subject leaves study before event occurs or ends before event happens), considering the presence of censoring as a population feature rather than a limitation of the sample 
+* Grounded in following assumption: A subject who developed event should have less predicted probability of surviving beyond his survival time than any subject who survived longer
+* Argue that need separate evaluation for prognostic models
 
 
 ## Uno et al 2011 On the C-statistics for Evaluating Overall Adequacy of Risk Prediction Procedures with Censored Survival Data
@@ -264,8 +289,6 @@ But when dealing with predictive/prognostic modeling, we need measures that cali
 * Problem: KM not good when **covariates dependent on T**
 * Alternative: **"usable pairs"**, excluding rest- Problem: **Dependency on censuring distribution** 
 * Solution : **modified c-statistic which is consistent for population concordance measure, free of censoring**
-
-### Conclusion 
 
 
 
@@ -326,11 +349,63 @@ autoplot(bmr, measure = measure)
 ```
 
 
+## Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures.
+
+### Introduction 
+
+* The task of diagnostic and prognostic constitute similar challenges 
+* The clinician has some information and wants to know how this relates to true patient state currently(diagnostic) or in the future (prognostic)
+* Traditional to evaluate statistical prediction we can quantify  eplained variation via R squared or brier score 
+* Calibration can be quantified via Hosmer Lemeshow goodness of fit test
+* Discrimination can be quantified via measure of sensitivty and specificity  via concordance statistics 
+* New measures include reclassification tables, relcassification improvement and integrated discrimination improvement 
+* The concept of risk reclassfication has caused substantial discussion in methdology and clinical literature 
+* Decision analytics tools have also found audience for studies focusing on clinical usefulness
+
+### Predictions models in medicine 
+
+*
+*
+*
+*
+
+
+### Conclusion 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Integrated Area under the Curve
+
+$$
+\mathrm{AUC}=\operatorname{Pr}\left\{z\left(\mathbf{X}_{i}\right)>z\left(\mathbf{X}_{j}\right) \mid D_{i}=1 \& D_{j}=0\right\}
+$$
+
+
+
+
+
+
+
+
+
 
 ## Prognostic Index Curve
 
-## Mean Absolute Error 
 
 P.Wang 2017 ML for SA 
 
@@ -338,17 +413,27 @@ P.Wang 2017 ML for SA
 
 ## Prediction error Curves
 
+
+## Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussion.
+
+
+
+
+
+
 # Implementation 
+
 
 # Conclusion
 
-What is the problem?
+Time to event studies require adjusted model evaluation tools for censored survival data.
+There are a number of different methods to evaluate models.
+At the core, studies separate between models that evaluate overall performance, discrimination and calibration.
+New methods such as reclassification and clinical usefulness have gained prominence among scholarship within recent research, but did not achieve the same level of recognition among clinicians and in the applied research community. 
 
-Why is one method worse?
 
-What is the solution?
 
-Advice for practical implementation?
+
 
 
 
@@ -360,7 +445,13 @@ Cook, N. R. (2007). Use and misuse of the receiver operating characteristic curv
 
 Gerds, T. A., & Schumacher, M. (2006). Consistent estimation of the expected Brier score in general survival models with right‐censored event times. Biometrical Journal, 48(6), 1029-1040.
 
+Graf, E., Schmoor, C., Sauerbrei, W., & Schumacher, M. (1999). Assessment and comparison of prognostic classification schemes for survival data. Statistics in medicine, 18(17‐18), 2529-2545.
+
 Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
+
+Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussion. Medical Decision Making, 28(1), 146-149.
+
+Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
 
 Uno, H., Cai, T., Pencina, M. J., D'Agostino, R. B., & Wei, L. J. (2011). On the C‐statistics for evaluating overall adequacy of risk prediction procedures with censored survival data. Statistics in medicine, 30(10), 1105-1117.
 
