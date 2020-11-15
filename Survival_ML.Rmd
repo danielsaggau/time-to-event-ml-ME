@@ -10,40 +10,6 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Introduction 
-
-Time to event studies:
-
-* What is a time to event study?
-
-Time to event studies have gained prominence in a variety of fields, but predominately found audience within the field of medical research.
-Nevertheless, areas of application are manifold and include e.g. financial statistics, examining the survival of an institution. 
-One feature of time to event studies is the unique data structure.
-A common characteristic of survival data is the right censored nature of observations.
-Right censored data means that not every subject in the study experiences the event of interest.
-The reasons for that can be various but one frequent reason for this is that the study ends prior to the event occurring.
-But this could also happen because we have subjects dropping out of our study, which might not be a common feature in financial statistics but occurs with considerable frequency in clinical or epidemiological studies. 
-Due to this data structure, model evaluation tools face the challenge of (XXX)
-
-Generally speaking, there are various model evaluation metrics.
-The model choice is heavily dependent on the task at hand.
-One way to categories models is e.g. separating them by diagnostic and prognostic.
-
-One distinguishes between discrimination, calibration, 
-Two prominent tools are the Receiver Operating Characteristic Curve or in short the ROC, and the c-statistics.
-This paper will introduce a number of methods, focusing on popular extensions of these prominent tools adjusted for survival studies namely the brier score and the c-index, two methods that have gained prominence within the realms of scholarship and among clinicians.
-Generally speaking, both measures, the c-index and the integrated brier score have their respective advantages and their unique merits have let these methods gained more attention than other methods.
-While the c-index does enjoy considerably prominence among clinicians due to interpretability and the ability to make comprehensive conclusions for the individual patients.
-Irrespective, the c-index only considers discrimination and does not account for calibration as an evaluation criterion which i will argue is a pivotal shortcoming when assessing different prognostic models and especially when working with machine learning methods in time to event studies.
-Inevitably, this paper suggests that the integrated brier score is the more holistic model evaluation metric from the stance of a statistician. 
-
-
-The paper is structured as follows:
-Firstly, i will introduce the integrated brier score, providing further information on the origin, theoretical underpinning and the respective characteristics.
-Secondly, i will introduce the c-index, following the same procedure as with the integrated brier score.
-Following the analysis of these two cornerstones of model evaluation for time to event studies, i will illustrate further competing methods and current research within the field. 
-Subsequently, the fourth section will provide a brief example of how to implement given methods in R.
-Lastly, the conclusion will summarize core findings of this brief comparative study. 
 
 # Traditional Model Evalution Metrics 
 
@@ -424,12 +390,6 @@ P.Wang 2017 ML for SA
 # Implementation 
 
 
-# Conclusion
-
-Time to event studies require adjusted model evaluation tools for censored survival data.
-There are a number of different methods to evaluate models.
-At the core, studies separate between models that evaluate overall performance, discrimination and calibration.
-New methods such as reclassification and clinical usefulness have gained prominence among scholarship within recent research, but did not achieve the same level of recognition among clinicians and in the applied research community. 
 
 
 
