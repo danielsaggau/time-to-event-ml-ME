@@ -51,15 +51,24 @@ Lastly, the conclusion will summarize core findings of this brief comparative st
 # Integrated Brier Score 
 
 ## Introduction and origin story 
+
+
 ## Explanation of Method 
+
+
 ## Advantages 
+
+
 ## Disadvantages 
 
 # c-index
 
 ## Introduction and origin story 
+
 ## Explanation of Method 
+
 ## Advantages 
+
 ## Disadvantages 
 
 
@@ -69,6 +78,8 @@ Time to event studies require adjusted model evaluation tools for censored survi
 There are a number of different methods to evaluate models.
 At the core, studies separate between models that evaluate overall performance, discrimination and calibration.
 New methods such as reclassification and clinical usefulness have gained prominence among scholarship within recent research, but did not achieve the same level of recognition among clinicians and in the applied research community. 
+
+
 # References 
 
 Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimination index for survival data. Statistics in medicine, 24(24), 3927-3944.

@@ -10,28 +10,7 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
-# Traditional Model Evalution Metrics 
-
-
-
-
-# Performance Evaluation metrics 
-
-# Integrated Brier Score 
-
-Structure: 
-
-* Introduction and origin story 
-
-* Explanation of Method 
-
-* Advantages 
-
-* Disadvantages 
-
-
-## P.Wang 2017 ML for SA 
+# P.Wang 2017 Machine Learning for Survival Analysis 
 
 * Named after Glenn W. Brier and initially used for inaccuracy of probabilistic forecasts
 * Can only be used with probabilistic outcomes [0;1, sum for each ind. is 1]
@@ -42,7 +21,7 @@ Structure:
 * rare events problematic (need to research)
 * uni-dimensional predictions the same as the mean squared error
 
-## Graf et al 1999
+# Graf et al 1999
 
 ### Introduction 
 
@@ -63,7 +42,7 @@ Structure:
 * Summary measures of inaccuracy may be obtained by using loss functions integrated with respect to suitable weight function
 * Introduce re-weighting scheme, leading to quantities that don't depend on censoring distribution asymptotically 
 
-## Kattan and Gerds 2018 Use and Misuse of the ROC curve 
+# Kattan and Gerds 2018 Use and Misuse of the ROC curve 
 
 ### Background- C-index
 
@@ -92,7 +71,7 @@ Structure:
 * Competing risks are mentioned; claim that two patients may have different clinical decisions even when exact same predicted risk of particular event (competing risks)
 
 
-## Gerds, T. A., & Schumacher, M. (2006). Consistent estimation of the expected Brier score in general survival models with right‐censored event times
+# Gerds, T. A., & Schumacher, M. (2006). Consistent estimation of the expected Brier score in general survival models with right‐censored event times
 
 ### Introduction 
 
@@ -103,72 +82,8 @@ Structure:
 
 ### Conclusion 
 
-*
-*
-*
 
-
-
-
-```{r}
-
-## See Andreas Bender Survival Analysis Model Evaluation
-library(dplyr)
-library(mgcv)
-library(pammtools)
-library(ggplot2)
-theme_set(theme_bw())
-library(survival)
-library(pec)
-
-data(tumor)
-## split data into train and test data
-n_train   <- 400
-train_idx <- sample(seq_len(nrow(tumor)), n_train)
-test_idx  <- setdiff(seq_len(nrow(tumor)), train_idx)
-## data transformation
-tumor_ped <- as_ped(tumor[train_idx, ], Surv(days, status)~.)
-
-# some simple models for comparison
-pam1 <- pamm(
-  formula = ped_status ~ s(tend) + charlson_score + age,
-  data = tumor_ped)
-pam2 <- pamm(
-  formula = ped_status ~ s(tend) + charlson_score + age + metastases + complications,
-  data = tumor_ped)
-pam3 <- pamm(
-  formula = ped_status ~s(tend, by = complications) + charlson_score + age +
-    metastases,
-  data = tumor_ped)
-# calculate prediction error curves (on test data)
-pec <- pec(
-  list(pam1 = pam1, pam2 = pam2, pam3 = pam3),
-  Surv(days, status) ~ 1, # formula for IPCW
-  data = tumor[test_idx, ], # new data not used for model fit
-  times = seq(.01, 1200, by = 10),
-  start = .01,
-  exact = FALSE
-)
-
-plot(pec)
-
-```
-
-
-# Concordance Index 
-
-Structure: 
-
-* Introduction and origin story 
-
-* Explanation of Method 
-
-* Advantages 
-
-* Disadvantages 
-
-
-## Nancy R Cook 2007, Use and Misuse of the Receiver Operating Characteristic Curve in Risk Prediction
+# Nancy R Cook 2007, Use and Misuse of the Receiver Operating Characteristic Curve in Risk Prediction
 
 ### Introduction 
 
@@ -198,18 +113,14 @@ But when dealing with predictive/prognostic modeling, we need measures that cali
 ### c statistics and Model Selection 
 
 * Because c stat is based on ranks it is less sensitive than e.g. measures based on likelihood 
-* 
-
-### Conclusion 
 
 
-## P.Wang 2017 ML for SA 
+# P.Wang 2017 ML for SA 
 
 * Common method to assess risk is to work with relative rather than absolute risk.
 * C- index works with concordance probability 
 
-## Antolini et al. 2005 A time-dependent discrimination index for survival data
-
+# Antolini et al. 2005 A time-dependent discrimination index for survival data
 
 ### Introduction 
 
@@ -237,7 +148,7 @@ But when dealing with predictive/prognostic modeling, we need measures that cali
 * Argue that need separate evaluation for prognostic models
 
 
-## Uno et al 2011 On the C-statistics for Evaluating Overall Adequacy of Risk Prediction Procedures with Censored Survival Data
+# Uno et al 2011 On the C-statistics for Evaluating Overall Adequacy of Risk Prediction Procedures with Censored Survival Data
 
 ### Introduction
 
@@ -257,98 +168,46 @@ But when dealing with predictive/prognostic modeling, we need measures that cali
 * Solution : **modified c-statistic which is consistent for population concordance measure, free of censoring**
 
 
-
-
-```{r}
-plot(cindex(
-  list(pam1 = pam1, pam2 = pam2, pam3 = pam3),
-  Surv(days, status) ~ 1,
-  data = tumor[test_idx, ],
-  eval.times = quantile(tumor$days[tumor$status == 1], c(.25, .5, .75))))
-```
-
-
-```{r}
-
-# For further information: https://mlr3book.mlr-org.com/survival.html
-library("mlr3learners")
-library("mlr3")
-library("mlr3proba")
-library("survival")
-library("ranger")
-library("mlr3viz")
-
-
-TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
-                    time = "start", time2 = "stop", type = "interval2")
-
-task = tsk("rats")
-
-# some integrated learners
-learners = lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
-print(learners)
-
-??msr()
-# Harrell's C-Index for survival
-measure = msr("surv.cindex")
-print(measure)
-
-set.seed(1)
-bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
-bmr$aggregate(measure)
-autoplot(bmr, measure = measure)
-
-```
-
-
-```{r}
-# for reference same with brier score 
-# Plot after 
-measure = msr("surv.brier")
-print(measure)
-
-set.seed(1)
-bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
-bmr$aggregate(measure)
-autoplot(bmr, measure = measure)
-
-```
-
-
-## Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures.
+# Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures.
 
 ### Introduction 
 
 * The task of diagnostic and prognostic constitute similar challenges 
 * The clinician has some information and wants to know how this relates to true patient state currently(diagnostic) or in the future (prognostic)
-* Traditional to evaluate statistical prediction we can quantify  eplained variation via R squared or brier score 
+* Traditional to evaluate statistical prediction we can quantify  explained variation via R squared or brier score 
 * Calibration can be quantified via Hosmer Lemeshow goodness of fit test
-* Discrimination can be quantified via measure of sensitivty and specificity  via concordance statistics 
-* New measures include reclassification tables, relcassification improvement and integrated discrimination improvement 
-* The concept of risk reclassfication has caused substantial discussion in methdology and clinical literature 
+* Discrimination can be quantified via measure of sensitivity and specificity  via concordance statistics 
+* New measures include reclassification tables, re-classification improvement and integrated discrimination improvement 
+* The concept of risk re-classification has caused substantial discussion in methodology and clinical literature 
 * Decision analytics tools have also found audience for studies focusing on clinical usefulness
 
 ### Predictions models in medicine 
 
-*
-*
-*
-*
+* Model extension with a marker: key interest of clinicians is whether to add a marker to an existing model 
+* Problem: Overoptimistic weight on marker performance
+* Only interested in the incremental added value of the marker 
+* Usefulness: For a model to be useful it has to be well calibrated
+* Decision support important 
+
+
+### Traditional performance measures 
+
+* Difference between goodness of fit and predictive performance is evaluation on same data while latter requires new data or cordds validation 
+* **Brier Score**: Quadratic scoring rule, where squared differences between actual binary outcome Y and prediction r are calculated 
+* model ranges from 0 to 0.25 for a non-informative model with a 50% incidence of the outcome 
+* For survival data we used weight function, considering conditional probability of being uncensored during time 
+* Calculate brier score at fixed time points and create time dependent curve
+* Score measures discrimination and calibration each which can be assessed separately
+
+### Discrimination 
+
+* 
+
+
+### Calibration 
 
 
 ### Conclusion 
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -361,38 +220,19 @@ $$
 \mathrm{AUC}=\operatorname{Pr}\left\{z\left(\mathbf{X}_{i}\right)>z\left(\mathbf{X}_{j}\right) \mid D_{i}=1 \& D_{j}=0\right\}
 $$
 
-
-
-
-
-
-
-
-
-
 ## Prognostic Index Curve
-
-
-P.Wang 2017 ML for SA 
-
-* Only evaluate events where the event occurred 
-
 ## Prediction error Curves
+
+
+
+
+
 
 
 ## Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussion.
 
 
-
-
-
-
 # Implementation 
-
-
-
-
-
 
 
 
