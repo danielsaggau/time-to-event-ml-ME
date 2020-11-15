@@ -201,10 +201,21 @@ But when dealing with predictive/prognostic modeling, we need measures that cali
 
 ### Discrimination 
 
-* 
-
+* Concordance statistic is most used for discrimination measure with generalized linear regression models. 
+* As a rank order statistic, ** it is insensitive to systemic errors in calibration such as differences in average outcome** 
+* popular extension: c statistic with censored data can be obtained by ignoring the pairs that cannot be ordered 
+* Gonen und Heller propose method where c statistic is independent of censoring 
+* Time dependent c-statistics have proposed (see above)
+* Could also use the discrimination slope to see how weel subject with and without outcome are separated 
 
 ### Calibration 
+
+*
+*
+
+
+### Novel performance measure 
+
 
 
 ### Conclusion 

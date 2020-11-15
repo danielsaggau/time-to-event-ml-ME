@@ -61,16 +61,17 @@ Lastly, the conclusion will summarize core findings of this brief comparative st
 
 ## Disadvantages 
 
-# c-index
+# Concordance Index 
 
-## Introduction and origin story 
+Structure: 
 
-## Explanation of Method 
+* Introduction and origin story 
 
-## Advantages 
+* Explanation of Method 
 
-## Disadvantages 
+* Advantages 
 
+* Disadvantages 
 
 # Conclusion
 
