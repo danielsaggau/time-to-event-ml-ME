@@ -10,17 +10,6 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# P.Wang 2017 Machine Learning for Survival Analysis 
-
-* Named after Glenn W. Brier and initially used for inaccuracy of probabilistic forecasts
-* Can only be used with probabilistic outcomes [0;1, sum for each ind. is 1]
-* Extended in 1999 for either binary or categorical outcomes for survival analysis
-* When using censored data, we re-weight the censored information
-
-
-* rare events problematic (need to research)
-* uni-dimensional predictions the same as the mean squared error
-
 # Graf et al 1999
 
 ### Introduction 
@@ -41,6 +30,19 @@ knitr::opts_chunk$set(echo = TRUE)
 * Brier and log score are well investigated and according to paper need to be implemented in SA.
 * Summary measures of inaccuracy may be obtained by using loss functions integrated with respect to suitable weight function
 * Introduce re-weighting scheme, leading to quantities that don't depend on censoring distribution asymptotically 
+
+
+
+# P.Wang 2017 Machine Learning for Survival Analysis 
+
+* Named after Glenn W. Brier and initially used for inaccuracy of probabilistic forecasts
+* Can only be used with probabilistic outcomes [0;1, sum for each ind. is 1]
+* Extended in 1999 for either binary or categorical outcomes for survival analysis
+* When using censored data, we re-weight the censored information
+* rare events problematic (need to research)
+* uni-dimensional predictions the same as the mean squared error
+
+
 
 # Kattan and Gerds 2018 Use and Misuse of the ROC curve 
 
@@ -86,14 +88,12 @@ knitr::opts_chunk$set(echo = TRUE)
 # Nancy R Cook 2007, Use and Misuse of the Receiver Operating Characteristic Curve in Risk Prediction
 
 ### Introduction 
-
-Accuracy of models can be assessed via calibration and discrimination. 
-**Calibration**: Measure how well predicted probabilities agree with actual observed risk. (prediction develop disease vs actual actual of disease)
-**Discrimination**: Measure of how well model can separate those who do and do not have disease of interest.(when predicts values for cases are all higher than for non-cases, we have perfect discrimination even when predicted risk does not match the proportion with disease)
+* Accuracy of models can be assessed via calibration and discrimination. 
+* **Calibration**: Measure how well predicted probabilities agree with actual observed risk. (prediction develop disease vs actual of disease)
+* **Discrimination**: Measure of how well model can separate those who do and do not have disease of interest.(when predicts values for cases are all higher than for non-cases, we have perfect discrimination even when predicted risk does not match the proportion with disease)
 * Discrimination is more interesting when we have a classification problem with patients that have and dont have prevalent disease (e.g. diagnostic testing). 
 * Discrimination is measured by c-statistics/ROC
-
-But when dealing with predictive/prognostic modeling, we need measures that calibrate and discriminate such as the brier score/R^2 and likelihood statistics.
+* But when dealing with predictive/prognostic modeling, we need measures that calibrate and discriminate such as the brier score/R^2 and likelihood statistics.
 * **Problem**: Risk prediction models in cardiovascular literature, use c-statistic, despite working with large prospective cohort studies. 
 
 
@@ -113,12 +113,6 @@ But when dealing with predictive/prognostic modeling, we need measures that cali
 ### c statistics and Model Selection 
 
 * Because c stat is based on ranks it is less sensitive than e.g. measures based on likelihood 
-
-
-# P.Wang 2017 ML for SA 
-
-* Common method to assess risk is to work with relative rather than absolute risk.
-* C- index works with concordance probability 
 
 # Antolini et al. 2005 A time-dependent discrimination index for survival data
 
@@ -233,12 +227,6 @@ $$
 
 ## Prognostic Index Curve
 ## Prediction error Curves
-
-
-
-
-
-
 
 ## Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussion.
 

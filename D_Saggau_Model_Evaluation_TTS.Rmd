@@ -23,7 +23,6 @@ A common characteristic of survival data is the right censored nature of observa
 Right censored data means that not every subject in the study experiences the event of interest.
 The reasons for that can be various but one frequent reason for this is that the study ends prior to the event occurring.
 But this could also happen because we have subjects dropping out of our study, which might not be a common feature in financial statistics but occurs with considerable frequency in clinical or epidemiological studies. 
-Due to this data structure, model evaluation tools face the challenge of (XXX)
 
 Generally speaking, there are various model evaluation metrics.
 The model choice is heavily dependent on the task at hand.
@@ -44,7 +43,86 @@ Following the analysis of these two cornerstones of model evaluation for time to
 Subsequently, the fourth section will provide a brief example of how to implement given methods in R.
 Lastly, the conclusion will summarize core findings of this brief comparative study. 
 
-# Traditional Model Evalution Metrics 
+# Model Evaluation metrics 
+
+When attempting to evaluate a model performance, there are various approaches.
+The optimal model evaluation metric inevitably will depend not only on the target but also the target audience at hand. 
+Broadly speaking, various scholars suggest that the most rudimentary distinction of model evaluation metrics is dependent on the ability to capture discrimination, "do patients who have outcome have higher risk predictions than those who dont" and model calibration, **"Measure how well predicted probabilities agree with actual observed risk".**. 
+I will briefly introduce these concepts. 
+Additionally to these pivotal considerations, scholarship and clinicians have also developed metrics that focus on decision analytics and reclassification measures. 
+These tools are less prominent, but will be mentioned as they also carry merit. 
+
+## Discrimination 
+
+Discrimination is the ability of a model to handle patients that do not have outcomes accordingly.
+Inevitably, when controlling for discrimination, we are controlling for how well our model is handling subjects with outcomes as compared to subjects without outcomes. 
+Therefore, as the name suggest, we are testing how strong our model discriminates between subjects that incur an event versus subjects that dont. 
+As a frequent property of survival data sets is the fact that have right censured data, data that entails subjects without the outcome/event taking place.
+Henceforth, discrimination is an important pillar for model evaluation in survival analysis. 
+Various measures have emerged, that deal with discrimination such as the c-index. 
+Perfect discrimination would imply that all our subjects with the event (e.g. a disease) have higher scores than subjects that do not have an event within their time period.
+One should note that when using a model that only controls for discrimination, our predictive accuracy could be horrible but as long as this condition holds, inaccurate models could be evaluated falsely as superior. 
+
+## Calibration 
+
+One should mention that especially when actually applying these methods, in a clinical setting one either deals with diagnostic or prognostic tasks.
+Diagnostic is the analysis of a given subject at that point in time.
+For binary classification tasks during diagnostic studies, where we need separate between e.g. patients with and without disease, discrimination is a very important concern and potentially of greater importance. 
+Prognostic on the other hand deals with predictive modeling, predicting e.g. in our surivival analysis setting the survival of a patient.
+
+When dealing with an prognostic analysis, calibration can become an important concern. 
+Calibration captures the accuracy of our predictions of our model.
+The underlying goal is to ensure that the predictions are as accurate as possible.
+For this very reason, the research community has highlighted the added value of using e.g. the integrated brier score, a score that controls for both discrimination and calibration.
+To further understand these methods, the following section will briefly introduce the origins of these methods, namely the ROC curve and the brier score.
+
+
+### Origin ROC / Concordance -statistics
+
+The  Receiver Operating Characteristic Curve (ROC) is an important model evaluation tool, gaining substantial prominence in various fields of statistics.
+This method is the foundation of the c-index which is one of the most prominent tools within the field of model evaluation for survival analysis. 
+In a nutshell, the ROC takes into account two factors namely sensitivity and specificity. 
+Sensitivity deals with the likelihood of positive test results, specifically it deals with values above the threshold among the subject group which do endure an event e.g. the subjects with diseases (Cook, N. 2007).
+Specificity on the other hand 
+
+* Specificity is the probability of a negative test result, or a value below a threshold among those without disease 
+* Sensitivity and specificity can be influenced e.g.
+* sensitivity among milder cases of disease 
+* specificity can depend on characteristics of non-cases, e.g. gender, age or prevalence of concomitant risk factors 
+* ROC is a plot of sensitivity versus 1- specificity 
+* The area under the curve or the c statistic ranges from 0.5 (no discrimination) to max of 1 (perfect discrimination)
+* Essentially, the c statistic is equivalent to the probability that the measure or predicted risk is higher for a case than for a non-case. 
+* Further, c-statistic describes how well models rank case and noncase; but not a function of actual predicted probabilities
+
+
+### C-index
+
+* c- index is the generalization of the ROC for survival data.
+* Because c stat is based on ranks it is less sensitive than e.g. measures based on likelihood 
+
+* Explanation of Method 
+
+* Advantages 
+
+Great popularity because so interpretable: 
+
+* Disadvantages 
+
+
+Problem: Studies ignoring calibation (**Problem**: Risk prediction models in cardiovascular literature, use c-statistic, despite working with large prospective cohort studies. Nancy Coook 2007)
+
+
+
+
+
+## Reclassification 
+
+## Decision Analytics tools 
+
+
+
+
+
 
 # Performance Evaluation metrics 
 
@@ -61,19 +139,7 @@ Lastly, the conclusion will summarize core findings of this brief comparative st
 
 ## Disadvantages 
 
-# Concordance Index 
 
-Structure: 
-
-* Introduction and origin story 
-
-* Explanation of Method 
-
-* Advantages 
-
-* Disadvantages 
-
-# Conclusion
 
 Time to event studies require adjusted model evaluation tools for censored survival data.
 There are a number of different methods to evaluate models.
