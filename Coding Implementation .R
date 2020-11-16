@@ -7,7 +7,10 @@ theme_set(theme_bw())
 library(survival)
 library(pec)
 
-data(tumor)
+patient <- patient
+tumor <- tumor
+
+
 ## split data into train and test data
 n_train   <- 400
 train_idx <- sample(seq_len(nrow(tumor)), n_train)
