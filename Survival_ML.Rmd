@@ -44,7 +44,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 
-# Kattan and Gerds 2018 Use and Misuse of the ROC curve 
+Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. 
 
 ### Background- C-index
 
@@ -208,7 +208,13 @@ knitr::opts_chunk$set(echo = TRUE)
 *
 
 
-### Novel performance measure 
+## Novel performance measure 
+
+### Reclassification 
+
+
+### Decision Analysis Curve 
+
 
 
 
@@ -233,16 +239,61 @@ $$
 
 # Implementation 
 
+### Gerds, T. A., Cai, T., & Schumacher, M. (2008). The performance of risk prediction models. 
 
 
+### Vickers, A. J., & Elkin, E. B. (2006). Decision curve analysis: a novel method for evaluating prediction models.
+
+* Contribute to existing models by adding weight of clinical consequences 
+* Considered valuable from a clinical usefulness perspective
+* Clearly, a linear weighting of false negative and false positives does not make any sense from the perspective of a clinician 
+* Clearly a false negative is way more detrimental than a false positive result (e.g. cancer patient , disease spread and when false positive we would go for further testing and detect error)
+* Decision curve analysis allows one to identify the range of threshold probabilities in which model was of value, the magnitude of benefit and which of several methods was optimal 
+* Compare their method to AUC method claiming that: 
+* AUC metric focuses solely on predictive accuracy of model 
+* Cannot tell us whether a model is worth using at all or which of two models is preferable 
+* AUC does not provide insight into usefulness aka does not account in their model that clinician may have other interests 
+* As a solution the decision analytic framework accounts for consequences and in theory tell us if a model is worth it or not 
+* Two general problems: require data such as on cost or quality adjusted life years, not found in the validation data set. 
+* Cannot be evaluated without further information
+* Secondly: decision analysis typically requires test or prediction model evaluated give a binary result s.t. the true and false positive and negative results can be estimated (but prediciton is frequently continuously expressed)
+* All in all, decision curve analysis is a complement not a substitue for AUC
+* Interpretation requires understanding of the liking of the patient * 
+* The proposed metho does not require obtaining information regarding treatment preferences but need theoretical relation for the threshold probabilty of diease and the realtive value of false positive and false negative results 
+
+### Cook, N. R., & Ridker, P. M. (2009). Advances in measuring the effect of individual predictors of cardiovascular risk:
+
+* Net reclassification improvement (NRI)
+* Integrated discrimination improvement 
+* IDI is equivalent to testing whether the regression coefficient in a model is equl to zero (similar to R^2 or the proportion of variance explained)
+* The NRI and the IDI both condition on the case-control or later disease status 
+* don't provide information on calibration of the estimated risk 
+* A limitation of NRI and other reclassification measures is that they depend on the particular categories used
+* The calibration test seems to depend somewhat less on the number of categories since the degree of freedom adjust for the number of cateogries
+* Suggest that reclassification calibration statistic and NRI may be useful in demonstrating the ability of new models and markers to change risk strata and alter treatment decision
+
+### Vickers, A. J., Van Calster, B., & Steyerberg, E. W. (2016). Net benefit approaches to the evaluation of prediction models, molecular markers, and diagnostic tests. bmj, 352, i6.
+
+* In contrast to measuring sensitivity or specificity, here measuring net benefit of using model, marker or test in clinical decision would do more good than harm 
+* By incorporating clinical consequences, s.a. benfit of finding disease early or the harm of unnecessary further testing 
+* Net benefit is simply type: we rescale harm by exchange rate to put on same scale as benefit 
+* plotting net benfit against range of exchange rates in what is called a decision curve 
+* This exchange rate can be dervied by asking questions such as max. number of patient a doctor would recommend for biopsy to find one cancer. (subjective)
+* plot for a lot of reasonable exchange rates in a decision curve
+
+Evaluation of Performance Steyerberg
 
 # References 
 
 Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimination index for survival data. Statistics in medicine, 24(24), 3927-3944.
 
+Bender, A., Rügamer, D., Scheipl, F., & Bischl, B. (2020). A General Machine Learning Framework for Survival Analysis. arXiv preprint arXiv:2006.15442.
+
 Cook, N. R. (2007). Use and misuse of the receiver operating characteristic curve in risk prediction. Circulation, 115(7), 928-935.
 
 Gerds, T. A., & Schumacher, M. (2006). Consistent estimation of the expected Brier score in general survival models with right‐censored event times. Biometrical Journal, 48(6), 1029-1040.
+
+Gerds, T. A., Cai, T., & Schumacher, M. (2008). The performance of risk prediction models. Biometrical Journal: Journal of Mathematical Methods in Biosciences, 50(4), 457-479.
 
 Graf, E., Schmoor, C., Sauerbrei, W., & Schumacher, M. (1999). Assessment and comparison of prognostic classification schemes for survival data. Statistics in medicine, 18(17‐18), 2529-2545.
 
@@ -252,7 +303,11 @@ Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussio
 
 Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
 
+Steyerberg, E. W. (2019). Clinical prediction models. Springer International Publishing.
+
 Uno, H., Cai, T., Pencina, M. J., D'Agostino, R. B., & Wei, L. J. (2011). On the C‐statistics for evaluating overall adequacy of risk prediction procedures with censored survival data. Statistics in medicine, 30(10), 1105-1117.
+
+Vickers, A. J., Van Calster, B., & Steyerberg, E. W. (2016). Net benefit approaches to the evaluation of prediction models, molecular markers, and diagnostic tests. bmj, 352, i6.
 
 Wang, P., Li, Y., & Reddy, C. K. (2019). Machine learning for survival analysis: A survey. ACM Computing Surveys (CSUR), 51(6), 1-36.
 Chicago	

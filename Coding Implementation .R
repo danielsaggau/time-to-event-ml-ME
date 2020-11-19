@@ -8,6 +8,7 @@ library(survival)
 library(pec)
 
 patient <- patient
+icu <- data(icu)
 tumor <- tumor
 
 
@@ -80,10 +81,6 @@ bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
 bmr$aggregate(measure)
 autoplot(bmr, measure = measure)
 
-```
-
-
-```{r}
 # for reference same with brier score
 # Plot after
 measure = msr("surv.brier")
@@ -94,4 +91,41 @@ bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
 bmr$aggregate(measure)
 autoplot(bmr, measure = measure)
 
-```
+
+#######################################
+
+#######################################
+
+set.seed(18713)
+
+library(prodlim)
+library(survival)
+library(riskRegression)
+library(pec)
+
+
+dat=SimSurv(100)
+pmodel=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE)
+perror=pec(list(Cox=pmodel),Hist(time,status)~1,data=dat)
+## cumulative prediction error
+crps(perror,times=1) # between min time and 1
+## same thing:
+y<- ibs(perror,times=1) # between min time and 1 crps(perror,times=1,start=0) # between 0 and 1 crps(perror,times=seq(0,1,.2),start=0) # between 0 and seq(0,1,.2)
+calPlot(pmodel)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
