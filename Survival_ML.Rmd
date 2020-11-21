@@ -321,6 +321,9 @@ Screening results can subsequently be used in prognostic models for later events
 * Further work needed to fully develop the statistical inference procedures 
 * 
 
+## van Houwelingen, H. C. (2000). Validation, calibration, revision and combination of prognostic survival models. Statistics in medicine, 19(24), 3401-3415.
+
+
 
 
 # References 
@@ -341,9 +344,16 @@ Gerds, T. A., Cai, T., & Schumacher, M. (2008). The performance of risk predicti
 
 Graf, E., Schmoor, C., Sauerbrei, W., & Schumacher, M. (1999). Assessment and comparison of prognostic classification schemes for survival data. Statistics in medicine, 18(17‐18), 2529-2545.
 
+Harrell Jr, F. E., Lee, K. L., & Mark, D. B. (1996). Multivariable prognostic models: issues in developing models, evaluating assumptions and adequacy, and measuring and reducing errors. Statistics in medicine, 15(4), 361-387.
+Chicago	
+
+Heagerty, P. J., Lumley, T., & Pepe, M. S. (2000). Time‐dependent ROC curves for censored survival data and a diagnostic marker. Biometrics, 56(2), 337-344.
+
 Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
 
 Pencina, M. J., D'Agostino Sr, R. B., D'Agostino Jr, R. B., & Vasan, R. S. (2008). Evaluating the added predictive ability of a new marker: from area under the ROC curve to reclassification and beyond. Statistics in medicine, 27(2), 157-172
+
+Potapov, S., Adler, W., & Schmid, M. (2012). survAUC: Estimators of prediction accuracy for time-to-event data. R package version, 1-0.
 
 Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussion. Medical Decision Making, 28(1), 146-149.
 
@@ -352,6 +362,8 @@ Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski
 Steyerberg, E. W. (2019). Clinical prediction models. Springer International Publishing.
 
 Uno, H., Cai, T., Pencina, M. J., D'Agostino, R. B., & Wei, L. J. (2011). On the C‐statistics for evaluating overall adequacy of risk prediction procedures with censored survival data. Statistics in medicine, 30(10), 1105-1117.
+
+van Houwelingen, H. C. (2000). Validation, calibration, revision and combination of prognostic survival models. Statistics in medicine, 19(24), 3401-3415.
 
 Vickers, A. J., Van Calster, B., & Steyerberg, E. W. (2016). Net benefit approaches to the evaluation of prediction models, molecular markers, and diagnostic tests. bmj, 352, i6.
 
