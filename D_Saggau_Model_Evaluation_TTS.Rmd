@@ -2,7 +2,7 @@
 title: "Model Evaluation for Time to Event Studies"
 author: "Daniel Saggau"
 date: "11/15/2020"
-fontsize: 11pt
+fontsize: 12pt
 output: pdf_document
 ---
 
@@ -10,10 +10,15 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r, include =F}
+library(prodlim)
+library(survival)
+library(riskRegression)
+library(pec)
+```
+
 
 # Introduction 
-
-Time to event studies:
 
 Time to event studies have gained prominence in a variety of fields, but predominately found audience within the field of medical research.
 Nevertheless, areas of application are manifold and include e.g. financial statistics, examining the survival of an institution. 
@@ -77,16 +82,19 @@ To further understand these methods, the following section will briefly introduc
 
 ### Origin ROC / Concordance -statistics
 
+# Introduced by elictrical engineers during ww2.
+
 The  Receiver Operating Characteristic Curve (ROC) is an important model evaluation tool, gaining substantial prominence in various fields of statistics.
 This method is the foundation of the c-index which is one of the most prominent tools within the field of model evaluation for survival analysis. 
 In a nutshell, the ROC takes into account two factors namely sensitivity and specificity. 
 Firstly, Sensitivity deals with the likelihood of positive test results, specifically it deals with values above the threshold among the subject group which do endure an event e.g. the subjects with diseases (Cook, N. 2007).
 Sensitivity becomes more volatile when for instance dealing with milder, nuanced cases of a disease. 
+Another name frequently used for Sensitivity is the true positive rate.
 On the other hand, specificity deals with false negatives, patients with a disease we classify as not having any diseases. 
 However, specificity is especially subject to the influence of the characteristics of a subject without disease.
+Another name for specificity is the true negative rate. 
 Examples of such characteristics are age or gender. 
 The ROC takes these two factors and plots sensitivity against 1- specificity. 
-
 
 * The area under the curve or the c statistic ranges from 0.5 (no discrimination) to max of 1 (perfect discrimination)
 * Essentially, the c statistic is equivalent to the probability that the measure or predicted risk is higher for a case than for a non-case. 
@@ -108,8 +116,6 @@ Uno et al 2011
 * Alternative: **"usable pairs"**, excluding rest- Problem: **Dependency on censuring distribution** 
 * Solution : **modified c-statistic which is consistent for population concordance measure, free of censoring**
 
-
-
 * Advantages 
 
 Great popularity because so interpretable: 
@@ -119,14 +125,17 @@ Great popularity because so interpretable:
 
 Problem: Studies ignoring calibation (Risk prediction models in cardiovascular literature, use c-statistic, despite working with large prospective cohort studies. Nancy Coook 2007)
 
-
 # Performance Evaluation metrics 
 
 # Integrated Brier Score
 
 ## Introduction and origin story 
 
-The score brier was intially used for weather forecasting.
+The score brier was initially used for weather forecasting.
+The general version of the brier score is also called prediction error or mean squared error(Schoop et al.,2011; Gerds & Schumacher, 2006).
+Henceforth, some of the applications e.g. in the 'pec' package use other terminolgy for the brier score.
+
+The mean squared error in a nutshell is the incurred quadratic loss, studying the predicted and the true event status (Schoop et al.,2011).
 
 ## Explanation of Method 
 
@@ -140,6 +149,7 @@ As suggested by Bender at al. (2020), one could use the 25, 50 and 75 percent th
 ## Advantages 
 
 IBS is a measure accounting for both discrimination and calibration.
+THe measure is an attempt to obtain an hollistic understanding of the model, rather than just looking at e.g. discrimination.
 
 #### Graf et al 1999
 * **Advantage**: More sophisticated to use estimated probabilities for prediction: Diagnostic test based on predictive values ; probabilities of positive or negative disease status rather than classification of diseased or not diseased. 
@@ -154,13 +164,20 @@ IBS is a measure accounting for both discrimination and calibration.
 
 ## Disadvantages 
 
+Kattan and Gerds (2018) suggest that the evaluation is somewhat problematic within a more practical setting. 
+They argue that the measure is less interpretable, given that one is only able to compare the performance relative to the best useless model.
+This implies that we are unable to see whether the implementation of the model is advisable in the first place.
+Steyerberg et al. (2010) further extend this argument, by arguing that one is unable to detect whether the implementation will cause more harm than benefit.
+Therefore, some scholars have advocated for complementary tests, to assess the overall profitability of implementing such measures, accounting for clinical consequences, or in other words more realistic weights given the preferences of clinicians.
+One should note that as perhaps not obvious, clinicians don't value the different components of model accuracy eqally.
+A false negative can be more detrimental than a false positive.
+For example, sending a sick patient home, in the believe of being healthy can do more damage than testing further on a healthy patient, that has been tested sick.
+
 ### Kattan and Gerds 2018
-* **BUT**: less interpretable because requires that the performance of model is compared to the performance of the best of the useless models 
 * Data dependence of reference value complicates Brier Score interpretation 
 * useless benchmark depends on overall event risk 
-* 
 
-
+t
 ### Reclassification
 
 Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010)
@@ -173,8 +190,6 @@ Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski
 *
 
 #### Net Reclassification improvement
-
-
 
 
 
@@ -223,6 +238,33 @@ One important consideration is that decision analysis curve is a complement, not
 * Interpretation requires understanding of the liking of the patient * 
 * The proposed method does not require obtaining information regarding treatment preferences but need theoretical relation for the threshold probabilty of diease and the realtive value of false positive and false negative results 
 
+# Implementation 
+
+## Discrimination Plot 
+
+A c-index above the threshold of 0,8 can be considered good (Zhang et al.,2018).
+
+
+## Calibration Plot 
+
+We can use calibration plots to visualize the calibration of our model.
+The 'pec' packages provides the 'calPlot' function.
+
+```{r}
+set.seed(18713)
+dat=SimSurv(100)
+pmodel=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE)
+perror=pec(list(Cox=pmodel),Hist(time,status)~1,data=dat)
+## cumulative prediction error
+crps(perror,times=1) # between min time and 1
+## same thing:
+y<- ibs(perror,times=1) # between min time and 1 crps(perror,times=1,start=0) # between 0 and 1 crps(perror,times=seq(0,1,.2),start=0) # between 0 and seq(0,1,.2)
+calPlot(pmodel)
+```
+
+A smaller brier score suggests a superior performance (Zhang et al.,2018).
+
+
 # Conclusion 
 
 Time to event studies require adjusted model evaluation tools for censored survival data.
@@ -238,6 +280,8 @@ Bender, A., Rügamer, D., Scheipl, F., & Bischl, B. (2020). A General Machine Le
 
 Cook, N. R. (2007). Use and misuse of the receiver operating characteristic curve in risk prediction. Circulation, 115(7), 928-935.
 
+Cook, N. R. (2008). Statistical evaluation of prognostic versus diagnostic models: beyond the ROC curve. Clinical chemistry, 54(1), 17-23.
+
 Cook, N. R., & Ridker, P. M. (2009). Advances in measuring the effect of individual predictors of cardiovascular risk: the role of reclassification measures. Annals of internal medicine, 150(11), 795-802.
 
 Gerds, T. A., & Schumacher, M. (2006). Consistent estimation of the expected Brier score in general survival models with right‐censored event times. Biometrical Journal, 48(6), 1029-1040.
@@ -247,6 +291,8 @@ Gerds, T. A., Cai, T., & Schumacher, M. (2008). The performance of risk predicti
 Graf, E., Schmoor, C., Sauerbrei, W., & Schumacher, M. (1999). Assessment and comparison of prognostic classification schemes for survival data. Statistics in medicine, 18(17‐18), 2529-2545.
 
 Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
+
+Schoop, R., Beyersmann, J., Schumacher, M., & Binder, H. (2011). Quantifying the predictive accuracy of time‐to‐event models in the presence of competing risks. Biometrical Journal, 53(1), 88-112.
 
 Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussion. Medical Decision Making, 28(1), 146-149.
 
@@ -262,3 +308,5 @@ Vickers, A. J., Van Calster, B., & Steyerberg, E. W. (2016). Net benefit approac
 
 Wang, P., Li, Y., & Reddy, C. K. (2019). Machine learning for survival analysis: A survey. ACM Computing Surveys (CSUR), 51(6), 1-36.
 Chicago	
+
+Zhang, Z., Cortese, G., Combescure, C., Marshall, R., Lee, M., Lim, H. J., & Haller, B. (2018). Overview of model validation for survival regression model with competing risks using melanoma study data. Annals of translational medicine, 6(16).

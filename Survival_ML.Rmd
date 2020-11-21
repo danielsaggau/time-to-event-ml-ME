@@ -283,6 +283,16 @@ $$
 
 Evaluation of Performance Steyerberg
 
+### Zhang, Z., Cortese, G., Combescure, C., Marshall, R., Lee, M., Lim, H. J., & Haller, B. (2018). Overview of model validation for survival regression model with competing risks using melanoma study data. Annals of translational medicine, 6(16).
+
+
+
+
+
+
+### Schoop, R., Beyersmann, J., Schumacher, M., & Binder, H. (2011).
+
+
 # References 
 
 Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimination index for survival data. Statistics in medicine, 24(24), 3927-3944.
@@ -290,6 +300,8 @@ Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimin
 Bender, A., Rügamer, D., Scheipl, F., & Bischl, B. (2020). A General Machine Learning Framework for Survival Analysis. arXiv preprint arXiv:2006.15442.
 
 Cook, N. R. (2007). Use and misuse of the receiver operating characteristic curve in risk prediction. Circulation, 115(7), 928-935.
+
+Cook, N. R. (2008). Statistical evaluation of prognostic versus diagnostic models: beyond the ROC curve. Clinical chemistry, 54(1), 17-23.
 
 Gerds, T. A., & Schumacher, M. (2006). Consistent estimation of the expected Brier score in general survival models with right‐censored event times. Biometrical Journal, 48(6), 1029-1040.
 
