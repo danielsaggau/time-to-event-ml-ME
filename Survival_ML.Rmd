@@ -285,15 +285,47 @@ Evaluation of Performance Steyerberg
 
 ### Zhang, Z., Cortese, G., Combescure, C., Marshall, R., Lee, M., Lim, H. J., & Haller, B. (2018). Overview of model validation for survival regression model with competing risks using melanoma study data. Annals of translational medicine, 6(16).
 
-
-
-
-
-
 ### Schoop, R., Beyersmann, J., Schumacher, M., & Binder, H. (2011).
 
 
+### Cook, N. R. (2008). Statistical evaluation of prognostic versus diagnostic models: Beyond the ROC Curve 
+
+* Prognostic models account for dimenison of time and introduce a stochastic element 
+* ROC used to evaluate separation ability between cases and non-cases (discrimination)
+* **Core hypothesis:** Risk classification can aid in comparing clinical impact of two models on risk for both individual and population 
+* Outcome not only unknown but might not exist yet
+* Prognostic studies used for risk stratification for assessing the level of risk 
+*Example: Framingham risk score for cardiovascular disease
+*Screen for early detection can be done for diagnostic such as cancer screening or colonsoscopy 
+Screening results can subsequently be used in prognostic models for later events 
+* discrimination and calibration both important for prognostic studies
+* Area under the curve is also known as he c-statistic or the c index and can rage fromm 0.5 (no predictive ability, bascially random) or 1 (perfecr discrimination)
+* c statistic is based on rank of predicted probabilites and compares ranks in indivudals with and without disease 
+* Similar to wilcoxon rank sum statistic (see 9) 
+* Cam be computed parametic and nonparametic
+* The ROC curve and c statistic are insenstive in assessing the impact of adding new predictiors to a score or predictive model (see 14)
+* The change in the ROC curve depends on both the predictive ability of the orginal set and the strength of the new marker , as well as the correlation between them 
+* For calibration, the most popular measure is the hosmer lemeshow goodness of fi test (16) 
+* Problem here: sensitive to how he subgroups are formed but groups need to be formed for evaluation (17)
+* When predicting true probability, perfect calibration
+* Clinical reclassification measures only discrimination
+* Advantage over ROC is that categories based on clinical important risk estimations 
+* For clinical studies ofen the intermediate risk categories are most important where treatment is questionable 
+* In summary, NRI and calibration test for cross-classified categories can be used to foramlly assessed clinical utility
+
+
+### Wu, Y. C., & Lee, W. C. (2014). Alternative performance measures for prediction models. PLoS One, 9(3), e91249.
+
+* sbrier upon addition of new markers i equal to the IDI index 
+* Gini, pietra nd sbrier can be expressed as ration, comparing the resolution power 
+* Further work needed to fully develop the statistical inference procedures 
+* 
+
+
+
 # References 
+
+Assel, M., Sjoberg, D. D., & Vickers, A. J. (2017). The Brier score does not evaluate the clinical utility of diagnostic tests or prediction models. Diagnostic and prognostic research, 1(1), 1-7.
 
 Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimination index for survival data. Statistics in medicine, 24(24), 3927-3944.
 
@@ -311,6 +343,8 @@ Graf, E., Schmoor, C., Sauerbrei, W., & Schumacher, M. (1999). Assessment and co
 
 Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
 
+Pencina, M. J., D'Agostino Sr, R. B., D'Agostino Jr, R. B., & Vasan, R. S. (2008). Evaluating the added predictive ability of a new marker: from area under the ROC curve to reclassification and beyond. Statistics in medicine, 27(2), 157-172
+
 Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussion. Medical Decision Making, 28(1), 146-149.
 
 Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
@@ -323,3 +357,7 @@ Vickers, A. J., Van Calster, B., & Steyerberg, E. W. (2016). Net benefit approac
 
 Wang, P., Li, Y., & Reddy, C. K. (2019). Machine learning for survival analysis: A survey. ACM Computing Surveys (CSUR), 51(6), 1-36.
 Chicago	
+
+Wu, Y. C., & Lee, W. C. (2014). Alternative performance measures for prediction models. PLoS One, 9(3), e91249.
+
+Zhang, Z., Cortese, G., Combescure, C., Marshall, R., Lee, M., Lim, H. J., & Haller, B. (2018). Overview of model validation for survival regression model with competing risks using melanoma study data. Annals of translational medicine, 6(16).
