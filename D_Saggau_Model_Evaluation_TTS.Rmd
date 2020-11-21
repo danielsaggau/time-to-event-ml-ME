@@ -1,8 +1,8 @@
 ---
 title: "Model Evaluation for Time to Event Studies"
 author: "Daniel Saggau"
-date: "11/15/2020"
-fontsize: 12pt
+date: "11/22/2020"
+fontsize: 11pt
 output: pdf_document
 ---
 
@@ -52,7 +52,8 @@ Firstly, one needs to differentiate between the type of study at hand, namely wh
 Prior to talking about different elements of model evaluation, we will briefly talk about the different type of studies relevant for survival data. 
 In a clinical setting, studies can be separated into diagnostic and prognostic studies.
 Diagnostic studies are concerned with the problem of how to classify a patient at this point in time- 
-Prognostic studies on the other hand are dealing with
+For binary classification tasks during diagnostic studies, where we need separate between e.g. patients with and without disease, discrimination is a very important concern and potentially of greater importance. 
+Prognostic on the other hand deals with predictive modeling, predicting e.g. in our survival analysis setting the survival of a patient.
 
 Now, we can disentangle the different components of model evaluation. 
 At the core, model evaluation differentiates between discrimination and calibration.
@@ -67,21 +68,6 @@ Henceforth, discrimination is an important pillar for model evaluation in surviv
 Various measures have emerged, that deal with discrimination such as the c-index or the net reclassification index. 
 Perfect discrimination would imply that all our subjects with the event (e.g. a disease) have higher scores than subjects that do not have an event within their time period.
 One should note that when using a model that only controls for discrimination, our predictive accuracy could be horrible but as long as this condition holds, inaccurate models could be evaluated falsely as superior. 
-
-## Calibration 
-
-One should mention that especially when actually applying these methods, in a clinical setting one either deals with diagnostic or prognostic tasks.
-Diagnostic is the analysis of a given subject at that point in time.
-For binary classification tasks during diagnostic studies, where we need separate between e.g. patients with and without disease, discrimination is a very important concern and potentially of greater importance. 
-Prognostic on the other hand deals with predictive modeling, predicting e.g. in our survival analysis setting the survival of a patient.
-
-When dealing with an prognostic analysis, calibration can become an important concern. 
-Calibration captures the accuracy of our predictions of our model.
-The underlying goal is to ensure that the predictions are as accurate as possible.
-MOre general ways to measure calibration are for instance the Hosmer Lemeshow test, the "goodness of fit" test. (Gerds and Schumacher, 2006)
-
-For this very reason, the research community has highlighted the added value of using e.g. the integrated brier score, a score that controls for both discrimination and calibration.
-To further understand these methods, the following section will briefly introduce the origins of these methods, namely the ROC curve and the brier score.
 
 ### Origin ROC / Concordance -statistics
 
@@ -103,7 +89,6 @@ The ROC takes these two factors and plots sensitivity against 1- specificity.
 * Further, c-statistic describes how well models rank case and noncase; but not a function of actual predicted probabilities
 
 ## Time dependent ROC 
-
 
 ### C-index
 
@@ -127,24 +112,6 @@ Irrespective, they also agree with the common consent and propose the use the c-
 * time dependent measures 
 * cumulative case dynamic control  
 
-For the individual at time t:
-
-$$L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})]$$
-
-For the population mean:
-
-$$L(S,t|t^*) = \frac{1}{N}\displaystyle\sum^N_{i=1}L(S_i,t_i|t^*)$$
-
-# Integrated Brier Score
-
-Integrated population mean version: 
-
-$$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*)$$
-
-
-
-Uno et al.(2011) propose a modified c-statistic which is consistent for population concordance measures.
-
 ##  Advantages 
 
 The c-index has gained popularity because so interpretable (Kattan and Gerds, 2018). 
@@ -160,8 +127,19 @@ Kattan and Gerds (2018) argue that model evaluation metrics also need to differe
 The c-index also does not account for clinical consequences and the subjective importance of false positives relative to false negatives. 
 This problem holds for both the c-index and the brier score but generally speaking, clinical cost are different than specified in these method.
 The relative ability of a model to perform might not be the only question of importance in model evaluation for clinicians. 
-For instance, other important questions could be whether introducing either model in the first place, or rephrased whether any of these models actually cause a net benefit. 
+For instance, other important questions could be whether introducing either model in the first place, or rephrased whether any of these models cause a net benefit. 
 Further Kattan and Gerds (2018) argue that model evaluation needs to account for the time horizon. 
+
+Uno et al.(2011) propose a modified c-statistic which is consistent for population concordance measures.
+
+## Calibration 
+
+When dealing with an prognostic analysis, calibration can become an important concern. 
+Calibration captures the accuracy of our predictions of our model.
+One ways to measure calibration is for instance the Hosmer-Lemeshow test, the "goodness of fit" test. (Gerds and Schumacher, 2006). 
+Another popular method is the the integrated brier score, a score that controls for both discrimination and calibration.
+
+# Brier Score
 
 ## Introduction and origin story 
 
@@ -170,6 +148,14 @@ The general version of the brier score is also called prediction error or mean s
 Henceforth, some of the applications e.g. in the 'pec' package use other terminology for the brier score.
 
 ## Explanation of Method 
+
+or the individual at time t:
+
+$$L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})]$$
+
+For the population mean:
+
+$$L(S,t|t^*) = \frac{1}{N}\displaystyle\sum^N_{i=1}L(S_i,t_i|t^*)$$
 
 The mean squared error in a nutshell is the incurred quadratic loss, studying the predicted and the true event status (Schoop et al.,2011).
 With uni-dimensional predictions the brier score is the same as the mean squared error.
@@ -180,6 +166,11 @@ To get a comprehensive understanding of model performance, multiple time points 
 
 ## Modifications
 
+Integrated population mean version: 
+
+$$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*)$$
+
+
 Wu and Lee (2014) advocate for the usage of the sBrier score.
 In a nutshell, the sBier score is the mean squared error for the current model divided by the mean squared error for the null model.
 
@@ -189,7 +180,7 @@ The integrated brier score is a measure accounting for both discrimination and c
 The measure is an attempt to obtain an holistic understanding of the model, rather than just looking at e.g. discrimination.
 Graf et al. (1999) argue that the method is more sophisticated than the c-index because it deals with probabilities for prediction rather than classifications.
 Moreover, Graf et al. (1999) suggest that the concordance statistics is merely a misclassification rate. 
-While the c-index would look at the different labels, true/false positives/negatives, here we are working with likelihoods and can actually compare accuracy of the scores. 
+While the c-index would look at the different labels, true/false positives/negatives, here we are working with likelihoods and can compare accuracy of the scores. 
 Another feature of the integrated brier score is the ability to differentiate between useless and harmful models. 
 Harmful models are models that make incorrect predictions while useless models always predict prevalence. 
 With e.g. Harell's c index, one is unable to differentiate between the two (Kattan and Gerds, 2018).
@@ -225,16 +216,14 @@ While NRI is only a  measure to study discrimination, it allows to account for t
 Therefore, this measure is also focusing on the clinical application, rather than holistic model evaluation.
 Henceforth, reclassification might just complement existing clinicians in practical applications as opposed to providing a dominant model evaluation tools. 
 
+
 ### Cook, N. R., & Ridker, P. M. (2009). Advances in measuring the effect of individual predictors of cardiovascular risk:
 
 * Integrated discrimination improvement 
 * IDI is equivalent to testing whether the regression coefficient in a model is equl to zero (similar to R^2 or the proportion of variance explained)
 * The NRI and the IDI both condition on the case-control or later disease status 
-* don't provide information on calibration of the estimated risk 
 * A limitation of NRI and other reclassification measures is that they depend on the particular categories used
-* The calibration test seems to depend somewhat less on the number of categories since the degree of freedom adjust for the number of cateogries
 * Suggest that reclassification calibration statistic and NRI may be useful in demonstrating the ability of new models and markers to change risk strata and alter treatment decision
-
 
 Pepe et al. (2015) suggestion caution when evaluating models solely based on 
 
@@ -284,8 +273,6 @@ Mean separation for the current model devided by the mean separation fro an erro
 ### Pietra
 
 Mean gain fo current model divided by the mean gain for an error free model 
-
-
 
 # Implementation 
 
@@ -361,10 +348,9 @@ dat=SimSurv(100)
 pmodel=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE)
 perror=pec(list(Cox=pmodel),Hist(time,status)~1,data=dat)
 ## cumulative prediction error
-crps(perror,times=1) # between min time and 1
+# crps(perror,times=1) # between min time and 1
 ## same thing:
 y<- ibs(perror,times=1) # between min time and 1 crps(perror,times=1,start=0) # between 0 and 1 crps(perror,times=seq(0,1,.2),start=0) # between 0 and seq(0,1,.2)
-
 ```
 
 ```{r}
@@ -386,6 +372,7 @@ Loss Functions/Calibration:
 * Log Loss
 
 Discrimination:
+
 * Uno's AUC
 * Song and Zhou’s AUC
 
@@ -394,6 +381,53 @@ miscellaneous:
 * van Houwelingen’s Alpha Calibration
 * van Houwelingen’s Beta Calibration
 
+```{r,include =F}
+library("mlr3learners")
+library("mlr3")
+library("mlr3proba")
+library("survival")
+library("ranger")
+library("mlr3viz")
+library("survAUC")
+
+TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
+             time = "start", time2 = "stop", type = "interval2")
+
+??tsk()
+
+task = tsk("rats")
+# some integrated learners
+learners = lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
+# print(learners)
+```
+
+
+```{r, include = F}
+measure = msr("surv.graf")
+print(measure)
+
+set.seed(1)
+bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
+bmr$aggregate(measure)
+```
+
+```{r}
+autoplot(bmr, measure = measure)
+```
+
+```{r, include =F}
+# C-Index for survival
+measure = msr("surv.cindex")
+set.seed(1)
+bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
+bmr$aggregate(measure)
+autoplot(bmr, measure = measure)
+```
+
+```{r}
+autoplot(bmr, measure = measure)
+```
+
 # Conclusion 
 
 Time to event studies require adjusted model evaluation tools for censored survival data.
@@ -401,8 +435,6 @@ At the core, studies separate between models that evaluate overall performance, 
 New methods such as reclassification and clinical usefulness have gained prominence among scholarship within recent research, but did not achieve the same level of recognition among clinicians and in the applied research community. 
 
 # References 
-
-Assel, M., Sjoberg, D. D., & Vickers, A. J. (2017). The Brier score does not evaluate the clinical utility of diagnostic tests or prediction models. Diagnostic and prognostic research, 1(1), 1-7.
 
 Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimination index for survival data. Statistics in medicine, 24(24), 3927-3944.
 
@@ -435,6 +467,8 @@ Potapov, S., Adler, W., & Schmid, M. (2012). survAUC: Estimators of prediction a
 
 Schoop, R., Beyersmann, J., Schumacher, M., & Binder, H. (2011). Quantifying the predictive accuracy of time‐to‐event models in the presence of competing risks. Biometrical Journal, 53(1), 88-112.
 
+Sonabend, R., Király, F. J., Bender, A., Bischl, B., & Lang, M. (2020). mlr3proba: Machine Learning Survival Analysis in R. arXiv preprint arXiv:2008.08080.
+
 Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussion. Medical Decision Making, 28(1), 146-149.
 
 Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
@@ -451,7 +485,6 @@ Vickers, A. J., & Elkin, E. B. (2006). Decision curve analysis: a novel method f
 
 Vickers, A. J., Van Calster, B., & Steyerberg, E. W. (2016). Net benefit approaches to the evaluation of prediction models, molecular markers, and diagnostic tests. bmj, 352, i6.
 
-Wang, P., Li, Y., & Reddy, C. K. (2019). Machine learning for survival analysis: A survey. ACM Computing Surveys (CSUR), 51(6), 1-36.
-Chicago	
+Wang, P., Li, Y., & Reddy, C. K. (2019). Machine learning for survival analysis: A survey. ACM Computing Surveys (CSUR), 51(6), 1-36. Chicago	
 
 Wu, Y. C., & Lee, W. C. (2014). Alternative performance measures for prediction models. PLoS One, 9(3), e91249.

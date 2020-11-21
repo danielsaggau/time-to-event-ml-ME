@@ -68,15 +68,10 @@ TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
              time = "start", time2 = "stop", type = "interval2")
 
 task = tsk("rats")
-
-??msr()
-msrs()
-
 # some integrated learners
 learners = lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
-print(learners)
+# print(learners)
 
-??msr()
 # Harrell's C-Index for survival
 measure = msr("surv.harrellC")
 print(measure)
@@ -90,12 +85,13 @@ autoplot(bmr, measure = measure)
 
 # C-Index for survival
 measure = msr("surv.cindex")
-print(measure)
-
 set.seed(1)
 bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
 bmr$aggregate(measure)
 autoplot(bmr, measure = measure)
+
+
+
 measure = msr("surv.logloss")
 set.seed(1)
 bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
