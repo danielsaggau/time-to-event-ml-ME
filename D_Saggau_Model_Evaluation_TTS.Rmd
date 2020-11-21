@@ -27,12 +27,10 @@ A common characteristic of survival data is the right censored nature of observa
 Right censored data means that not every subject in the study has an event e.g. a time where the illness occurs or when the patient dies.
 The reasons for that can be various but one frequent reason for this is that the study ends prior to the event occurring.
 Another reason could be  that we have subjects dropping out of our study, occurring with considerable frequency in clinical or epidemiological studies. 
-
-Generally speaking, there are various model evaluation metrics.
-This paper will introduce a number of methods, focusing on popular extensions of the mean squared error and the area under the curve, adjusted for survival studies namely the brier score and the c-index, two methods that have gained prominence within the realms of scholarship and among clinicians.
+This paper will introduce a number of model evaluation metrics, focusing on popular extensions of the mean squared error and the area under the curve, adjusted for survival studies namely the brier score and the c-index, two methods that have gained prominence within the realms of scholarship and among clinicians.
 The c-index does enjoy considerably prominence among clinicians due to interpretability and the ability to make comprehensive conclusions for the individual patients.
 Irrespective, the c-index only considers discrimination and does not account for calibration as an evaluation criterion is a pivotal shortcoming when assessing prognostic studies.
-Inevitably, this paper suggests that the integrated brier score is the more holistic model evaluation metric from the stance of a statistician.
+Inevitably, this paper suggests that the integrated brier score is the more holistic model evaluation metric.
 
 The paper is structured as follows:
 Firstly, i will introduce the integrated brier score, providing further information on the origin, theoretical underpinning and the respective characteristics.
@@ -100,17 +98,15 @@ Another shortcoming of the usage of rank correlation is ordering of survival tim
 Survival data frequently is censored. 
 Therefore modifications of the traditional ROC is needed. 
 
-### Example modification 
+### Modifications 
 
 Antolini et al. (2005) propose a time dependent c-index, where discrimination is summarized over time.
 Their model considered the presence of a population feature rather than a shortcoming of the sample. 
 Irrespective, they also agree with the common consent and propose the use the c-index in symbiosis with a tool to measure calibration for model evaluation. 
 
-* time to event version 
-* integrated AUC
-* IDI, NRI
-* time dependent measures 
+* time to event version / integrated AUC
 * cumulative case dynamic control  
+* IDI, NRI
 
 ##  Advantages 
 
@@ -121,7 +117,7 @@ The c-index has gained popularity because so interpretable (Kattan and Gerds, 20
 As mentioned above, for a more nuanced prevalence of a disease, the sensitivity is affected and henceforth problematic.(Cook,N., 2007)
 Specificity is also dependent on the data structure, but as suggested by Cook (2007), specificity is for instance affected by age, gender and the prevalence of concomitant risk factors.
 
-Problem: Studies ignoring calibration (Risk prediction models in cardiovascular literature, use c-statistic, despite working with large prospective cohort studies. Nancy Coook 2007)
+Studies ignoring calibration (Risk prediction models in cardiovascular literature, use c-statistic, despite working with large prospective cohort studies. Nancy Coook 2007)
 While for diagnostic studies, discrimination is the most important feature for a model evaluation metric, the same is not true for prognostic studies.
 Kattan and Gerds (2018) argue that model evaluation metrics also need to differentiate between useless and harmful models. 
 The c-index also does not account for clinical consequences and the subjective importance of false positives relative to false negatives. 
@@ -169,7 +165,6 @@ To get a comprehensive understanding of model performance, multiple time points 
 Integrated population mean version: 
 
 $$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*)$$
-
 
 Wu and Lee (2014) advocate for the usage of the sBrier score.
 In a nutshell, the sBier score is the mean squared error for the current model divided by the mean squared error for the null model.
@@ -227,8 +222,6 @@ Henceforth, reclassification might just complement existing clinicians in practi
 
 Pepe et al. (2015) suggestion caution when evaluating models solely based on 
 
-
-
 ### Decision Analysis Curve 
 
 One fundamental problem of the methods that we have introduced is that it does not really accommodate the interests of clinicians. 
@@ -240,25 +233,13 @@ Further, preferences may differ from a clinical standpoint.
 E.g. sensitivity and specificity are frequently unequal in importance to a clinician.
 Henceforth, scholars have proposed a new complementary framework to assess the net benefit of a model, providing a tool to assess whether implementing a new model is worth it in the first place (Vickers, A., Elkin, E., 2006).
 Decision analysis curve enables the use of weights, allowing optimal decision making based on subjective preferences, embodied in a net benefit equation.
-Vickers et al. (2016) interpret those net benefits as "clinical consequences".
 Further Vickers et al. (2016) illustrate that harm is transformed, using an exchange rate to put harm and benefit on one scale.
 This exchange rate can be obtained by asking clinicians questions based on their subjective preferences such as how many patients they would have undergo a biopsy prior to finding a cancer or weighing the benefits of getting early findings as opposed to the cost of harmful further testing.
 Together these elements build the net-benefit equation.
 Plotting different exchange rates with the net benefit equation, gives us the decision analysis curve. 
 The curves enable the practitioner the identification of the rage of threshold probabilities for when a model would be of value, providing information on the necessary benefits needed for a model to be useful and which of many models is optimal (Vickers, A., Elkin, E., 2006).
-
 One important consideration is that decision analysis curve is a complement, not a substitute to existing models (Vickers, A., Elkin, E., 2006).
 
-### Vickers, A. J., & Elkin, E. B. (2006). Decision curve analysis: a novel method for evaluating prediction models.
- 
-* Compare their method to AUC method claiming that: 
-* AUC metric focuses solely on predictive accuracy of model 
-* Cannot tell us whether a model is worth using at all or which of two models is preferable 
-* AUC does not provide insight into usefulness aka does not account in their model that clinician may have other interests 
-* Two general problems: require data such as on cost or quality adjusted life years, not found in the validation data set. Cannot be evaluated without further information
-* Secondly: decision analysis typically requires test or prediction model evaluated give a binary result s.t. the true and false positive and negative results can be estimated (but prediciton is frequently continuously expressed)
-* Interpretation requires understanding of the liking of the patient * 
-* The proposed method does not require obtaining information regarding treatment preferences but need theoretical relation for the threshold probabilty of diease and the realtive value of false positive and false negative results 
 
 ## Other proposals 
 
@@ -336,7 +317,6 @@ IDI.INF.OUT(res.IDI.INF)
 IDI.INF.GRAPH(res.IDI.INF)
 ```
 
-
 ## Calibration Plot 
 
 We can use calibration plots to visualize the calibration of our model.
@@ -365,7 +345,7 @@ Benchmark
 
 - mlr3 proba:
 
-Loss Functions/Calibration:
+Loss Functions Based/Calibration:
 
 * Integrated Graf Score
 * Integrated Log Loss
@@ -380,6 +360,8 @@ miscellaneous:
 
 * van Houwelingen’s Alpha Calibration
 * van Houwelingen’s Beta Calibration
+* 
+
 
 ```{r,include =F}
 library("mlr3learners")

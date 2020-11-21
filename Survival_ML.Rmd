@@ -272,6 +272,19 @@ $$
 * The calibration test seems to depend somewhat less on the number of categories since the degree of freedom adjust for the number of cateogries
 * Suggest that reclassification calibration statistic and NRI may be useful in demonstrating the ability of new models and markers to change risk strata and alter treatment decision
 
+
+
+### Vickers, A. J., & Elkin, E. B. (2006). Decision curve analysis: a novel method for evaluating prediction models.
+ 
+* Compare their method to AUC method claiming that: 
+* AUC metric focuses solely on predictive accuracy of model 
+* Cannot tell us whether a model is worth using at all or which of two models is preferable 
+* AUC does not provide insight into usefulness aka does not account in their model that clinician may have other interests 
+* Two general problems: require data such as on cost or quality adjusted life years, not found in the validation data set. Cannot be evaluated without further information
+* Secondly: decision analysis typically requires test or prediction model evaluated give a binary result s.t. the true and false positive and negative results can be estimated (but prediciton is frequently continuously expressed)
+* The proposed method does not require obtaining information regarding treatment preferences but need theoretical relation for the threshold probabilty of diease and the realtive value of false positive and false negative results 
+
+
 ### Vickers, A. J., Van Calster, B., & Steyerberg, E. W. (2016). Net benefit approaches to the evaluation of prediction models, molecular markers, and diagnostic tests. bmj, 352, i6.
 
 * In contrast to measuring sensitivity or specificity, here measuring net benefit of using model, marker or test in clinical decision would do more good than harm 
