@@ -65,20 +65,19 @@ A third prominent evaluation criteria is clinical usefulness which will be discu
 Discrimination is the ability of a model to handle patients that do not have outcomes accordingly.
 Inevitably, when controlling for discrimination, we are controlling for how well our model is handling subjects with outcomes as compared to subjects without outcomes. 
 Therefore, as the name suggest, we are testing how strong our model discriminates between subjects that incur an event versus subjects that don't. 
-As a frequent property of survival data sets is the fact that have right censured data, data that entails subjects without the outcome/event taking place.
-Henceforth, discrimination is an important pillar for model evaluation in survival analysis. 
+Discrimination is an important pillar for model evaluation in survival analysis. 
 Various measures have emerged, that deal with discrimination such as the c-index or the net reclassification index. 
 Perfect discrimination would imply that all our subjects with the event have higher scores than subjects that do not have an event within their time period.
-One should note that when using a model that only controls for discrimination, our predictive accuracy could be horrible but as long as this condition holds, inaccurate models could be evaluated falsely as superior. 
+One should note that when using a model that only controls for discrimination, our predictive accuracy could be horrible but as long as this condition holds, inaccurate models could be evaluated falsely as superior.
 
 ### Origin ROC / Concordance-statistics
 
-The  Receiver Operating Characteristic Curve (ROC) is an important model evaluation tool, gaining substantial prominence in various fields of statistics.
-The ROC was introduced by electrical engineers during world war 2.
+The  Receiver Operating Characteristic Curve (ROC) is an important model evaluation tool, gaining substantial prominence in various fields.
 In a nutshell, the ROC takes into account two factors namely sensitivity and specificity.
-
-Firstly, Sensitivity deals with the likelihood of positive test results, specifically it deals with values above the threshold among the subject group which do endure an event e.g. the subjects with diseases (Cook, N. 2007).
-Haegerty et al. (2000) use the following notation:
+One should note that there are many names for these factors, but essentially all describing the same thing. 
+Firstly, Sensitivity deals with the likelihood of positive test results.
+Specifically sensitivity deals with values above the threshold among the subject group which do endure an event e.g. the subjects with diseases (Cook, N. 2007).
+Haegerty et al. (2000) use the following mathematical notation:
 
 $$
 Sensitivity (c,t) = P\{X > c | D(t)=1\} \tag{1} 
@@ -86,7 +85,12 @@ $$
 
 Sensitivity becomes more volatile when for instance dealing with milder, nuanced cases of a disease. 
 Another name frequently used for Sensitivity is the true positive rate.
-On the other hand, specificity deals with false negatives, patients with a disease we classify as not having any diseases. 
+
+$$
+TPF = \frac{TP}{TP+FN}
+$$
+
+On the other hand, specificity deals with false negatives, patients with a disease we classify as not having any diseases.
 
 $$
 Specificity (c,t) = P\{X > c | D(t)=0\} \tag{2}
@@ -94,6 +98,12 @@ $$
 
 However, specificity is especially subject to the influence of the characteristics of a subject without disease.
 Another name for specificity is the true negative rate. 
+
+$$
+TNR = \frac{TN}{TN+FP}
+$$
+
+
 Examples of such characteristics are age or gender. 
 The ROC takes these two factors and plots sensitivity against 1- specificity. 
 
@@ -101,9 +111,7 @@ The ROC takes these two factors and plots sensitivity against 1- specificity.
 * Essentially, the c statistic is equivalent to the probability that the measure or predicted risk is higher for a case than for a non-case. 
 * Further, c-statistic describes how well models rank case and noncase; but not a function of actual predicted probabilities
 
-## Time dependent ROC 
-
-### C-index
+## C-index
 
 The c- index is the generalization of the ROC for survival data (Cook, N., 2007).
 The c statistic is a rank correlation measure, focusing on Kendall's  tau (Uno et al., 2011). 
@@ -118,12 +126,14 @@ Alternatively, there are a number of time dependent measures and modification of
 
 ### Modifications 
 
+#### Time dependency
+
 Antolini et al. (2005) propose a time dependent c-index, where discrimination is summarized over time.
 Their model considered the presence of a population feature rather than a shortcoming of the sample. 
 Irrespective, they also agree with the common consent and propose the use the c-index in symbiosis with a tool to measure calibration for model evaluation. 
 One shortcoming of the c-statistics is that it does not account for time dependence.
 
-Heagerty and Zheng introduce 3 modifications of the AUC, namely the (1) cumulative sensitivity and dynamic specificity (C/D), (2) incident sensitivity and dynamic specificity (I/D) and (3) incident sensitivity and static specificity (I/S).
+Heagerty and Zheng (2005) introduce 3 modifications of the AUC, namely the (1) cumulative sensitivity and dynamic specificity (C/D), (2) incident sensitivity and dynamic specificity (I/D) and (3) incident sensitivity and static specificity (I/S).
 
 **cumulative sensitivity and dynamic specificity**: Cumulative sensitivity describes the likelihood of a subject to experience a higher score among those who already experienced the event prior to time t. 
 Dynamic specificity is the counterpart, looking at the likelihood of subjects to have lower scores among the event free subjects surpassing point t (Kamarudin et al., 2017).
@@ -132,8 +142,11 @@ As this is often the case, this method has frequently found application in clini
 
 **incident sensitivity and dynamic specificity**: Here sensitivity is the likelihood of a subject to have a greater score among the individuals who have the event taking place at a the time point t. 
 Respectively, the specificity is the likelihood of a subject to have a lower score among the individuals who dont have the event taking place in time t. 
-This measure is less frequently used and mostly not the focus of clinicial studies.
-** incident sensitivity and static specificity**:
+This measure is less frequently used and mostly not the focus of clinicial studies.(Kamarudin et al., 2017).
+
+**incident sensitivity and static specificity**:
+The sensitivity is again the likelihood of a subject to have a greater score among the individuals who have the event taking place at a the time point t while the control is an event free individual for a fixed follow up period.
+As the second and third modifcation are rarely used, scholarship usually only focuses on the C/D variation.(Kamarudin et al., 2017).
 
 $$
 Se^I = P(X_i>c|T_i=t) \tag{3}
@@ -159,22 +172,18 @@ $$
 \mathrm{IAUC}=\operatorname{Pr}\left\{z\left(\mathbf{X}_{i}\right)>z\left(\mathbf{X}_{j}\right) \mid D_{i}=1  \&  D_{j}=0\right\} \tag{7}
 $$
 
-* cumulative case dynamic control  
-* IDI, NRI
-
-
-
-
 ### Wu, Y. C., & Lee, W. C. (2014)
-
-Lorenz Curve 
-Gini
-
-Mean separation for the current model divided by the mean separation fro an error free model 
+* Lorenz Curve 
+* Gini: Mean separation for the current model divided by the mean separation for an error free model 
 
 ##  Advantages 
 
-The c-index has gained popularity because so interpretable (Kattan and Gerds, 2018). 
+The c-index has gained popularity because so interpretable (Kattan and Gerds, 2018).
+Especially for the individual patient in diagnostic studies, this method has gained popularity.
+Further, there are lots of modifications of this method.
+
+Performance is not assessed relative to a different model.
+Therefore evaluation does not require pairs of patients, which is more realistic. 
 
 ## Disadvantages 
 
@@ -290,7 +299,6 @@ Henceforth, reclassification might just complement existing clinicians in practi
 
 ### Pencina, M. J., D'Agostino Sr, R. B., D'Agostino Jr, R. B., & Vasan, R. S. (2008). Evaluating the added predictive ability of a new marker: from area under the ROC curve to reclassification and beyond
 
-
 ### Decision Analysis Curve 
 
 One fundamental problem of the methods that we have introduced is that it does not really accommodate the interests of clinicians. 
@@ -401,32 +409,30 @@ y<- ibs(perror,times=1) # between min time and 1 crps(perror,times=1,start=0) # 
 calPlot(pmodel)
 ```
 
-## Prediction Error plot
+## mlr3 implementation 
 
-## mlr 3 implementation 
+Sonabend et al. (2020) provide a package for the mlr3 framework, namely mlr3proba.
+An useful component is the benchmarking feature of different model evaluation measures.
+The mlr3proba entails 5 different measures directly namely: 
 
-Benchmark
-
-- mlr3 proba:
-
-Loss Functions Based/Calibration:
-
+* van Houwelingen’s Alpha Calibration
+* van Houwelingen’s Beta Calibration
 * Integrated Graf Score
 * Integrated Log Loss
 * Log Loss
 
-Discrimination:
+Further measures via survAUC package:
 
-* Uno's AUC
-* Song and Zhou’s AUC
+* Uno's AUC/TPR/TNR
+* Song and Zhou’s AUC/TNR/TPR
 
 ### Song, X., & Zhou, X. H. (2008). A semiparametric approach for the covariate specific ROC curve with survival outcome. Statistica Sinica, 947-965.
 
-miscellaneous:
-
-* van Houwelingen’s Alpha Calibration
-* van Houwelingen’s Beta Calibration
-
+* Chambless and Diao’s AUC
+* Hung and Chiang’s AUC
+* Nagelkerke’s R2
+* O’Quigley, Xu, and Stare’s R2
+* Xu and O’Quigley’s R2
 
 ```{r,include =F}
 library("mlr3learners")
@@ -471,15 +477,12 @@ bmr$aggregate(measure)
 autoplot(bmr, measure = measure)
 ```
 
-```{r}
-autoplot(bmr, measure = measure)
-```
-
 # Conclusion 
 
 Time to event studies require adjusted model evaluation tools for censored survival data.
 At the core, studies separate between models that evaluate overall performance, discrimination and calibration.
-New methods such as reclassification and clinical usefulness have gained prominence among scholarship within recent research, but did not achieve the same level of recognition among clinicians and in the applied research community. 
+Both the c-index for discrimination, and the IBS for discrimination and calibration, are well established tools to undertake model evaluation.
+New methods such as reclassification and clinical usefulness have gained prominence among scholarship.
 
 # References 
 
