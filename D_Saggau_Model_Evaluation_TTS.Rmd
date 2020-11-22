@@ -331,9 +331,16 @@ Wu, Y. C., & Lee, W. C. (2014)
 
 Notable packages: 
 
-* 'pec'
+'pec':
+
+* cindex()
+* 
+
+
 * 'survival' 
 concordance() function 
+
+
 
 * 'survIDINRI'
 
