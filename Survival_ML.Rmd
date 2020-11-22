@@ -272,8 +272,6 @@ $$
 * The calibration test seems to depend somewhat less on the number of categories since the degree of freedom adjust for the number of cateogries
 * Suggest that reclassification calibration statistic and NRI may be useful in demonstrating the ability of new models and markers to change risk strata and alter treatment decision
 
-
-
 ### Vickers, A. J., & Elkin, E. B. (2006). Decision curve analysis: a novel method for evaluating prediction models.
  
 * Compare their method to AUC method claiming that: 
@@ -337,8 +335,6 @@ Screening results can subsequently be used in prognostic models for later events
 ## van Houwelingen, H. C. (2000). Validation, calibration, revision and combination of prognostic survival models. Statistics in medicine, 19(24), 3401-3415.
 
 
-
-
 # References 
 
 Assel, M., Sjoberg, D. D., & Vickers, A. J. (2017). The Brier score does not evaluate the clinical utility of diagnostic tests or prediction models. Diagnostic and prognostic research, 1(1), 1-7.
@@ -361,6 +357,9 @@ Harrell Jr, F. E., Lee, K. L., & Mark, D. B. (1996). Multivariable prognostic mo
 Chicago	
 
 Heagerty, P. J., Lumley, T., & Pepe, M. S. (2000). Time‐dependent ROC curves for censored survival data and a diagnostic marker. Biometrics, 56(2), 337-344.
+
+Hung, H., & Chiang, C. T. (2010). Estimation methods for time‐dependent AUC models with survival data. Canadian Journal of Statistics, 38(1), 8-26.
+Chicago	
 
 Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
 
