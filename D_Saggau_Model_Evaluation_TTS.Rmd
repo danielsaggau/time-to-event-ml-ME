@@ -455,7 +455,7 @@ TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
 
 ??tsk()
 
-task = tsk("rats")
+task = tsk("unemployment")
 # some integrated learners
 learners = lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
 # print(learners)
