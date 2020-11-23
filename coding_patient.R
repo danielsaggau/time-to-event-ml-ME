@@ -42,3 +42,22 @@ plot(cindex(
   eval.times = quantile(patient$days[patient$PatientDied == 1], c(.25, .5, .75))))
 ```
 summary(patient)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$$Se^I = P(X_i>c|T_i=t) \tag{3}$$
+$$Sp^D = P(X_i\|T_i>t) \tag{4}$$
+$$\mathrm{IAUC}=\operatorname{Pr}\left\{z\left(\mathbf{X}_{i}\right)>z\left(\mathbf{X}_{j}\right) \mid D_{i}=1  \&  D_{j}=0\right\} \tag{7} $$

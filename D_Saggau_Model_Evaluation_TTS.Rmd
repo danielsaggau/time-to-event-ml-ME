@@ -24,24 +24,19 @@ library(survIDINRI)
 
 Time to event studies frequently introduce the challenge of working right censored data,  a common characteristic survival data used e.g. in clinical and epidemiological studies .
 Right censored data is data that does not entail the occurrence of events for every subject.
-The reasons for that can be various.
-One example would be that the study ends prior to the event occurring.
-This paper will provide a comprehensive overview a number of model evaluation metrics and respective modifications for time to event studies, focusing predominately on popular extensions of the loss function and the receiver operating characteristic curve, namely the IBS and the c-index.
+Reasons for that can be manifold but one example would be that the study ends prior to the event occurring.
+This paper will provide a overview a number of model evaluation metrics and respective modifications for time to event studies, focusing predominately on popular extensions of the loss function and the receiver operating characteristic curve, namely the IBS and the c-index.
 
 The c-index does enjoy considerably prominence among clinicians due to interpretability and the ability to make comprehensive conclusions for the individual subject.
 Irrespective, the c-index only considers discrimination and does not account for calibration as an evaluation criterion is a pivotal shortcoming when assessing prognostic studies.
 Henceforth, this paper suggests that the integrated brier score is the preferable tool for model evaluation.
-Further, clinicians have also advocated for other criteria for model evaluation such as the usage of clinical usefulness.
-We will discuss two popular variations namely the decision analysis curves and reclassification tables.
-These methods are merely complements for existing discrimination methods and henceforth will only be of secondary focus. 
+For completeness, there will be a brief outline of potential new measures. 
 
-The paper is structured as follows:
-
-I will introduce the integrated brier score, providing further information on the origin, theoretical underpinning and the respective characteristics.
-I will introduce the c-index, following the same procedure as with the integrated brier score.
+The paper is structured as follows:I will introduce the integrated brier score, providing further information on the origin, theoretical underpinning and the respective characteristics.
+Further, I will introduce the c-index.
 Following the analysis of these two cornerstones of model evaluation for time to event studies, i will illustrate further methods and current research within the field. 
-Subsequently, the fourth section will provide an example of how to implement given methods in R.
-Lastly, the conclusion will summarize core findings of this brief comparative study. 
+Subsequently, the section thereafter will provide an example of how to implement given methods in R.
+Lastly, the conclusion will summarize core findings of this brief outline. 
 
 # Model Evaluation metrics 
 
@@ -50,15 +45,15 @@ Firstly, one needs to differentiate between the type of study at hand, namely wh
 
 ## Diagnostic and Prognostic studies 
 
-Prior to talking about different elements of model evaluation, we will briefly talk about the different type of studies relevant for survival data. 
 In a clinical setting, studies can be separated into diagnostic and prognostic studies.
 Diagnostic studies are concerned with the problem of how to classify a patient at this point in time.
-For binary classification tasks during diagnostic studies, where we need separate between e.g. patients with and without disease, discrimination is a very important concern and potentially of greater importance. 
-Prognostic on the other hand deals with predictive modeling, predicting e.g. in our survival analysis setting the survival of a patient.
+For binary classification tasks during diagnostic studies, where we need separate between e.g. patients with and without disease, discrimination is a crucial concern. 
+Prognostics on the other hand deals with predictive modeling.
+For prognostic studies, we need to ensure that 
 
 Now, we can disentangle the different components of model evaluation. 
 Model evaluation differentiates between discrimination and calibration.
-A third prominent evaluation criteria is clinical usefulness which will be discussed later on.
+A third prominent evaluation criteria is clinical usefulness which will be discussed later.
 
 ## Discrimination 
 
@@ -77,11 +72,6 @@ In a nutshell, the ROC takes into account two factors namely sensitivity and spe
 One should note that there are many names for these factors, but essentially all describing the same thing. 
 Firstly, Sensitivity deals with the likelihood of positive test results.
 Specifically sensitivity deals with values above the threshold among the subject group which do endure an event e.g. the subjects with diseases (Cook, N. 2007).
-Haegerty et al. (2000) use the following mathematical notation:
-
-$$
-Sensitivity (c,t) = P\{X > c | D(t)=1\} \tag{1} 
-$$
 
 Sensitivity becomes more volatile when for instance dealing with milder, nuanced cases of a disease. 
 Another name frequently used for Sensitivity is the true positive rate.
@@ -91,11 +81,6 @@ TPF = \frac{TP}{TP+FN}
 $$
 
 On the other hand, specificity deals with false negatives, patients with a disease we classify as not having any diseases.
-
-$$
-Specificity (c,t) = P\{X > c | D(t)=0\} \tag{2}
-$$
-
 However, specificity is especially subject to the influence of the characteristics of a subject without disease.
 Another name for specificity is the true negative rate. 
 
@@ -103,35 +88,25 @@ $$
 TNR = \frac{TN}{TN+FP}
 $$
 
-
 Examples of such characteristics are age or gender. 
 The ROC takes these two factors and plots sensitivity against 1- specificity. 
-
-* The area under the curve or the c statistic ranges from 0.5 (no discrimination) to max of 1 (perfect discrimination)
-* Essentially, the c statistic is equivalent to the probability that the measure or predicted risk is higher for a case than for a non-case. 
-* Further, c-statistic describes how well models rank case and noncase; but not a function of actual predicted probabilities
+The area under the curve or the c statistic ranges from 0.5 (no discrimination) to max of 1 (perfect discrimination)
+Essentially, the c statistic is equivalent to the probability that the measure or predicted risk is higher for a case than for a non-case. 
+Further, c-statistic describes how well models rank case and non-case, but not a function of predicted probabilities.
+The c statistic is a rank correlation measure, focusing on Kendall's  tau (Uno et al., 2011). 
+Because c statistics is based on ranks it is less sensitive than e.g. measures based on likelihood (e.g. loss functions).
 
 ## C-index
 
+Due to the fact that we deal need to be able to deal with censored data, we need to modify the ROC.
 The c- index is the generalization of the ROC for survival data (Cook, N., 2007).
-The c statistic is a rank correlation measure, focusing on Kendall's  tau (Uno et al., 2011). 
-An alternative is working with loss functions. 
-Because c statistics is based on ranks it is less sensitive than e.g. measures based on likelihood.
-Another shortcoming of the usage of rank correlation is ordering of survival times when we dont have a complete data set. 
-Survival data frequently is censored. 
-Therefore modifications of the traditional ROC is needed. 
-
-The baseline version of the c-statistics is a summary measure.
 Alternatively, there are a number of time dependent measures and modification of this method and the ROC curve, interesting for time to event studies. 
 
 ### Modifications 
 
-#### Time dependency
-
 Antolini et al. (2005) propose a time dependent c-index, where discrimination is summarized over time.
 Their model considered the presence of a population feature rather than a shortcoming of the sample. 
 Irrespective, they also agree with the common consent and propose the use the c-index in symbiosis with a tool to measure calibration for model evaluation. 
-One shortcoming of the c-statistics is that it does not account for time dependence.
 
 Heagerty and Zheng (2005) introduce 3 modifications of the AUC, namely the (1) cumulative sensitivity and dynamic specificity (C/D), (2) incident sensitivity and dynamic specificity (I/D) and (3) incident sensitivity and static specificity (I/S).
 
@@ -142,19 +117,11 @@ As this is often the case, this method has frequently found application in clini
 
 **incident sensitivity and dynamic specificity**: Here sensitivity is the likelihood of a subject to have a greater score among the individuals who have the event taking place at a the time point t. 
 Respectively, the specificity is the likelihood of a subject to have a lower score among the individuals who dont have the event taking place in time t. 
-This measure is less frequently used and mostly not the focus of clinicial studies.(Kamarudin et al., 2017).
+This measure is less frequently used and mostly not the focus of clinical studies.(Kamarudin et al., 2017).
 
 **incident sensitivity and static specificity**:
 The sensitivity is again the likelihood of a subject to have a greater score among the individuals who have the event taking place at a the time point t while the control is an event free individual for a fixed follow up period.
-As the second and third modifcation are rarely used, scholarship usually only focuses on the C/D variation.(Kamarudin et al., 2017).
-
-$$
-Se^I = P(X_i>c|T_i=t) \tag{3}
-$$
-
-$$
-Sp^D = P(X_i\|T_i>t) \tag{4}
-$$
+As the second and third modification are rarely used, scholarship usually only focuses on the C/D variation.(Kamarudin et al., 2017).
 
 $$
 AUC^{I,D}(t) = P(X_i>c | T_i>t) \tag{5}
@@ -163,18 +130,6 @@ $$
 $$
 C^T = \int^T_0 AUC^{I,D}(t)w^T(t)dt \tag{6}
 $$
-
-
-* R^2 like coefficients 
-* time to event version / integrated AUC
-
-$$
-\mathrm{IAUC}=\operatorname{Pr}\left\{z\left(\mathbf{X}_{i}\right)>z\left(\mathbf{X}_{j}\right) \mid D_{i}=1  \&  D_{j}=0\right\} \tag{7}
-$$
-
-### Wu, Y. C., & Lee, W. C. (2014)
-* Lorenz Curve 
-* Gini: Mean separation for the current model divided by the mean separation for an error free model 
 
 ##  Advantages 
 
@@ -187,19 +142,25 @@ Therefore evaluation does not require pairs of patients, which is more realistic
 
 ## Disadvantages 
 
-As mentioned above, for a more nuanced prevalence of a disease, the sensitivity is affected and henceforth problematic.(Cook,N., 2007)
-Specificity is also dependent on the data structure, but as suggested by Cook (2007), specificity is for instance affected by age, gender and the prevalence of concomitant risk factors.
-
-Studies ignoring calibration (Risk prediction models in cardiovascular literature, use c-statistic, despite working with large prospective cohort studies. Nancy Coook 2007)
 While for diagnostic studies, discrimination is the most important feature for a model evaluation metric, the same is not true for prognostic studies.
-Kattan and Gerds (2018) argue that model evaluation metrics also need to differentiate between useless and harmful models. 
-The c-index also does not account for clinical consequences and the subjective importance of false positives relative to false negatives. 
-This problem holds for both the c-index and the brier score but generally speaking, clinical cost are different than specified in these method.
-The relative ability of a model to perform might not be the only question of importance in model evaluation for clinicians. 
-For instance, other important questions could be whether introducing either model in the first place, or rephrased whether any of these models cause a net benefit. 
-Further Kattan and Gerds (2018) argue that model evaluation needs to account for the time horizon. 
+Henceforth, using a concordance statistic for prognostic studies is not advised.
 
-Uno et al.(2011) propose a modified c-statistic which is consistent for population concordance measures.
+### Estimators can be influenced by data 
+
+As mentioned above, for a more nuanced prevalence of a disease, the sensitivity is affected and henceforth problematic (Cook,N., 2007). 
+Specificity is dependent on the data structure, but as suggested by Cook (2007), specificity is for instance affected by age, gender and the prevalence of concomitant risk factors.
+
+### Clinical consequences 
+
+For instance, other important questions could be whether introducing either model in the first place, or rephrased whether any of these models cause a net benefit. 
+This argument is related to the analogy of Kattan and Gerds (2018), arguing that model evaluation metrics needs to be able to differentiate between useless and harmful models.
+Harmful models are models that make incorrect predictions while useless models always predict prevalence. 
+The c-index does not account for clinical consequences and the subjective importance of false positives relative to false negatives. 
+This problem holds for both the c-index and the brier score but generally speaking, clinical cost are different than specified in these method.
+
+### Accounting for time 
+
+Further Kattan and Gerds (2018) argue that model evaluation needs to account for the time horizon. 
 
 ## Calibration 
 
@@ -208,17 +169,26 @@ Calibration captures the accuracy of our predictions of our model.
 One ways to measure calibration is for instance the Hosmer-Lemeshow test, the "goodness of fit" test. (Gerds and Schumacher, 2006). 
 Another popular method is the the integrated brier score, a score that controls for both discrimination and calibration.
 
+Uno et al.(2011) propose a modified c-statistic which is consistent for population concordance measures.
+
 # Brier Score
 
 ## Introduction and origin story 
 
-The score brier was initially used for weather forecasting.
-The general version of the brier score is also called prediction error or mean squared error (Schoop et al.,2011; Gerds & Schumacher, 2006).
+The score brier was initially used for weather forecasting (Graf et al., 1999).
+With uni-dimensional predictions the brier score is the same as the mean squared error. 
+Other terminology that you might encounter is the predicted error or mean squared loss function (Schoop et al.,2011; Gerds & Schumacher, 2006).
 Henceforth, some of the applications e.g. in the 'pec' package use other terminology for the brier score.
 
 ## Explanation of Method 
 
-or the individual at time t:
+The mean squared error in a nutshell is the incurred quadratic loss, studying the predicted and the true event status (Schoop et al.,2011).
+Graf et al. (1999) state that the "...expected brier score may be interpreted as a mean squared error of prediction when the estimated prob, which take values in interval [0,1] are viewed as prediction of event status at t*,I(T>t*) in {0,1}."
+The brier score is dependent on the evaluation time.
+By introducing a reweighing scheme, one derives quantities that are independent on the censoring distribution and hence suitable for censored data (Graf et al.,1999).
+To get a comprehensive time dependent model performance, multiple time points have to be studied.
+
+For the individual at time t:
 
 $$
 L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})] \tag{8}
@@ -229,13 +199,6 @@ For the population mean:
 $$
 L(S,t|t^*) = \frac{1}{N}\displaystyle\sum^N_{i=1}L(S_i,t_i|t^*) \tag{9}
 $$
-
-The mean squared error in a nutshell is the incurred quadratic loss, studying the predicted and the true event status (Schoop et al.,2011).
-With uni-dimensional predictions the brier score is the same as the mean squared error.
-Graf et al. (1999) state that the "...expected brier score may be interpreted as a mean squared error of prediction when the estimated prob, which take values in interval [0,1] are viewed as prediction of event status at t*,I(T>t*) in {0,1}."
-The brier score is dependent on the evaluation time.
-By introducing a reweighing scheme, one derives quantities that are independent on the censoring distribution and hence suitable for censored data (Graf et al.,1999)
-To get a comprehensive understanding of model performance, multiple time points have to be studied.
 
 ## Modifications
 
@@ -250,28 +213,31 @@ In a nutshell, the sBier score is the mean squared error for the current model d
 
 ## Advantages 
 
-The integrated brier score is a measure accounting for both discrimination and calibration.
-The measure is an attempt to obtain an holistic understanding of the model, rather than just looking at e.g. discrimination.
-Graf et al. (1999) argue that the method is more sophisticated than the c-index because it deals with probabilities for prediction rather than classifications.
-Moreover, Graf et al. (1999) suggest that the concordance statistics is merely a misclassification rate. 
-While the c-index would look at the different labels, true/false positives/negatives, here we are working with likelihoods and can compare accuracy of the scores. 
-Another feature of the integrated brier score is the ability to differentiate between useless and harmful models. 
-Harmful models are models that make incorrect predictions while useless models always predict prevalence. 
+The integrated brier score is a measure accounting for both discrimination and calibration separately, henceforth it is more holistic.
+Graf et al. (1999) argue that the method is more sophisticated than the c-index because it deals with probabilities allowing us insights into the accuracy of our predictions rather than (mis-)classifications.
+As mentioned, the integrated brier score has the ability to differentiate between useless and harmful models. 
 With e.g. Harell's c index, one is unable to differentiate between the two (Kattan and Gerds, 2018).
 
 ## Disadvantages 
 
-The benchmark of the different models are also dependent on the overall prevalence of the event in our data set. 
-Henceforth, when working with data where the event rarely takes place, the benchmark becomes convoluted (Kattan and Gerds, 2018)
 Kattan and Gerds (2018) suggest that the evaluation is somewhat problematic with respect to numerous aspects.
-One pivotal shortcoming of the method is the inability to compare results independent from other models. 
-Kattan and Gerds (2018)  argue that one is only able to compare a model compared to other models and henceforth one is always at best only able to see that the one method is superior to the other models at hand. 
+The benchmark of the different models are dependent on the overall prevalence of the event in our data set. 
+Henceforth, when working with data where the event rarely takes place, the benchmark becomes convoluted (Kattan and Gerds, 2018).
+
+# Interpretation in Pairs
+
+One pivotal shortcoming of the method is the inability to compare results independent from other models.
+Hence, one is at best only able to see that the one method is superior to the other models at hand. 
 Especially in a practical setting, when undertaking a diagnosis for a patient this is rather impractical as patients don't come in pairs. 
-Furthermore, this implies that we are unable to see whether the implementation of the model is advisable in the first place.
-Steyerberg et al. (2010) further extend this argument, by arguing that one is unable to detect whether the implementation will cause more harm than benefit.
-Therefore, some scholars have advocated for complementary tests, to assess the overall profitability of implementing such measures, accounting for clinical consequences, or in other words more realistic weights given the preferences of clinicians.
-One should note that as perhaps not obvious, clinicians don't value the different components of model accuracy equally.
-A false negative can be more detrimental than a false positive.
+
+
+# Clinicial consequences 
+
+We are unable to see whether the implementation of the model is advisable in the first place.
+Steyerberg et al. (2010) argue that one is unable to detect whether the implementation will cause more harm than benefit.
+Therefore, some scholars have advocated for complementary tests, to assess the overall profitability of implementing such measures.
+These complementary tests account for clinical consequences, or in other words more realistic weights given the preferences of clinicians.
+Clinicians usually don't value the different components of model accuracy equally as their clinical consequences are not equivalent. 
 For example, sending a sick patient home, in the believe of being healthy can do more damage than testing further on a healthy patient, that has been tested sick.
 
 ### Reclassification
@@ -303,8 +269,7 @@ Henceforth, reclassification might just complement existing clinicians in practi
 
 One fundamental problem of the methods that we have introduced is that it does not really accommodate the interests of clinicians. 
 From the perspective of a clinician, giving false positive and false negatives the same weight does not make any sense. 
-A false negative entails severe repercussions relative to the false positive. 
-For stance lets say we result in a false negative for a cancer patient, the patient is harmed to a detrimental extend and deprived of the opportunity to undertake earlier action. 
+For instance lets say we result in a false negative for a cancer patient, the patient is harmed to a detrimental extend and deprived of the opportunity to undertake earlier action. 
 Moreover, these methods do not really tell us whether introducing the new model creates added value.
 Further, preferences may differ from a clinical standpoint.
 E.g. sensitivity and specificity are frequently unequal in importance to a clinician.
@@ -320,11 +285,6 @@ One important consideration is that decision analysis curve is a complement, not
 
 ## Other proposals 
 
-Wu, Y. C., & Lee, W. C. (2014)
-
-* Gini: Mean separation for the current model divided by the mean separation fro an error free model 
-* Pietra: Mean gain fo current model divided by the mean gain for an error free model 
-
 ## TOC
 
 # Implementation 
@@ -336,13 +296,11 @@ Notable packages:
 * cindex()
 * 
 
-
-* 'survival' 
+'survival': 
 concordance() function 
 
 
-
-* 'survIDINRI'
+'survIDINRI': 
 
 ## Discrimination Plot 
 
@@ -390,10 +348,6 @@ res.IDI.INF <- IDI.INF(indata = pbc[,c("time","event")],
 IDI.INF.OUT(res.IDI.INF)
 
 ## M1 red area; M2 distance between black points; M3 distance between gray points
-```
-
-```{r}
-IDI.INF.GRAPH(res.IDI.INF)
 ```
 
 ## Calibration Plot 
@@ -455,7 +409,7 @@ TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
 
 ??tsk()
 
-task = tsk("unemployment")
+task = tsk("rats")
 # some integrated learners
 learners = lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
 # print(learners)
