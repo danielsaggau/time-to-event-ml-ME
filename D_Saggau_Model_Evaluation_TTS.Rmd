@@ -1,9 +1,11 @@
 ---
-title: "Model Evaluation for Time to Event Studies"
+title: "Model Evaluation for Time-to-Event Studies"
 author: "Daniel Saggau"
 date: "11/22/2020"
 fontsize: 11pt
-output: pdf_document
+output:
+   pdf_document:
+    number_sections: true
 ---
 
 ```{r setup, include=FALSE}
@@ -22,34 +24,35 @@ library(survIDINRI)
 
 # Introduction 
 
-Time to event studies frequently introduce the challenge of working right censored data,  a common characteristic survival data used e.g. in clinical and epidemiological studies .
-Right censored data is data that does not entail the occurrence of events for every subject.
-Reasons for that can be manifold but one example would be that the study ends prior to the event occurring.
-This paper will provide a overview a number of model evaluation metrics and respective modifications for time to event studies, focusing predominately on popular extensions of the loss function and the receiver operating characteristic curve, namely the IBS and the c-index.
+A common challenge of Time-to-Event studies is working with right censored data.
+Right censored data is data where not all patients have an event occurring.
+Reasons for that can be manifold, but one example would be that the study ends prior to the event occurring.
+This paper will illustrate some model evaluation metrics and respective modifications for Time-to-Event studies, focusing predominately on popular extensions of the loss function and the receiver operating characteristic curve, specifically focusing on the IBS and the c-index.
 
-The c-index does enjoy considerably prominence among clinicians due to interpretability and the ability to make comprehensive conclusions for the individual subject.
-Irrespective, the c-index only considers discrimination and does not account for calibration as an evaluation criterion is a pivotal shortcoming when assessing prognostic studies.
-Henceforth, this paper suggests that the integrated brier score is the preferable tool for model evaluation.
-For completeness, there will be a brief outline of potential new measures. 
+The c-index does enjoy considerably prominence among clinicians due to interpretability and the ability to make comprehensive conclusions for individual subjects.
+Irrespective, the c-index only considers discrimination and does not account for calibration.
+Henceforth, based on this shortcoming and some other considerations discussed throughout the  paper, we suggests that the integrated brier score is the preferable tool for model evaluation.
+For completeness, there will be a brief outline of novel methods, suggesting considering potential for future research. 
 
-The paper is structured as follows:I will introduce the integrated brier score, providing further information on the origin, theoretical underpinning and the respective characteristics.
-Further, I will introduce the c-index.
-Following the analysis of these two cornerstones of model evaluation for time to event studies, i will illustrate further methods and current research within the field. 
-Subsequently, the section thereafter will provide an example of how to implement given methods in R.
+The paper is structured as follows:
+Firstly, there is an introduction of the different components of model evaluation.
+The subsequent sections outline the two dominant methods for Time-to-Event studies.
+After talking about some further complementary methods, the section thereafter will provide an example of how to implement given methods in R.
 Lastly, the conclusion will summarize core findings of this brief outline. 
 
-# Model Evaluation metrics 
+# Components of Model Evaluation 
 
-When attempting to evaluate a model performance, there are various components to consider.
-Firstly, one needs to differentiate between the type of study at hand, namely whether we are dealing with 'prognostic studies' or 'diagnostic studies'.
+When evaluating model performance, there are various components to consider.
+Firstly, one needs to differentiate between the type of study at hand.
+In a clinical setting, studies can be separated into diagnostic and prognostic studies.
 
 ## Diagnostic and Prognostic studies 
 
-In a clinical setting, studies can be separated into diagnostic and prognostic studies.
 Diagnostic studies are concerned with the problem of how to classify a patient at this point in time.
 For binary classification tasks during diagnostic studies, where we need separate between e.g. patients with and without disease, discrimination is a crucial concern. 
 Prognostics on the other hand deals with predictive modeling.
-For prognostic studies, we need to ensure that 
+Here, model accuracy becomes a more relevant topic.
+Diagnostic is of less interest for the field of machine learning. 
 
 Now, we can disentangle the different components of model evaluation. 
 Model evaluation differentiates between discrimination and calibration.
@@ -58,22 +61,25 @@ A third prominent evaluation criteria is clinical usefulness which will be discu
 ## Discrimination 
 
 Discrimination is the ability of a model to handle patients that do not have outcomes accordingly.
-Inevitably, when controlling for discrimination, we are controlling for how well our model is handling subjects with outcomes as compared to subjects without outcomes. 
+When controlling for discrimination, we are controlling for how well our model is handling subjects with outcomes as compared to subjects without outcomes. 
 Therefore, as the name suggest, we are testing how strong our model discriminates between subjects that incur an event versus subjects that don't. 
 Discrimination is an important pillar for model evaluation in survival analysis. 
-Various measures have emerged, that deal with discrimination such as the c-index or the net reclassification index. 
 Perfect discrimination would imply that all our subjects with the event have higher scores than subjects that do not have an event within their time period.
 One should note that when using a model that only controls for discrimination, our predictive accuracy could be horrible but as long as this condition holds, inaccurate models could be evaluated falsely as superior.
+Various measures have emerged, that deal with discrimination such as the concordance statistics or the net reclassification index. 
 
-### Origin ROC / Concordance-statistics
+### Concordance-statistics, Harell's C and the c-index
 
-The  Receiver Operating Characteristic Curve (ROC) is an important model evaluation tool, gaining substantial prominence in various fields.
+The  Receiver Operating Characteristic Curve (ROC) is an important model evaluation tool for discrimination.
+The ROC is the foundation for the concordance statistics or in short the c-statistics.
+Another name for the c-statistics is the c-index.
 In a nutshell, the ROC takes into account two factors namely sensitivity and specificity.
-One should note that there are many names for these factors, but essentially all describing the same thing. 
+One should note that there are many names for these two factors, but essentially all describing the same thing. 
+
 Firstly, Sensitivity deals with the likelihood of positive test results.
 Specifically sensitivity deals with values above the threshold among the subject group which do endure an event e.g. the subjects with diseases (Cook, N. 2007).
 
-Sensitivity becomes more volatile when for instance dealing with milder, nuanced cases of a disease. 
+Sensitivity becomes more volatile when e.g. dealing with milder, nuanced cases of a disease. 
 Another name frequently used for Sensitivity is the true positive rate.
 
 $$
@@ -90,23 +96,18 @@ $$
 
 Examples of such characteristics are age or gender. 
 The ROC takes these two factors and plots sensitivity against 1- specificity. 
-The area under the curve or the c statistic ranges from 0.5 (no discrimination) to max of 1 (perfect discrimination)
-Essentially, the c statistic is equivalent to the probability that the measure or predicted risk is higher for a case than for a non-case. 
-Further, c-statistic describes how well models rank case and non-case, but not a function of predicted probabilities.
-The c statistic is a rank correlation measure, focusing on Kendall's  tau (Uno et al., 2011). 
-Because c statistics is based on ranks it is less sensitive than e.g. measures based on likelihood (e.g. loss functions).
+The area under the curve or the c-statistic ranges from 0.5 (no discrimination) to max of 1 (perfect discrimination).
 
-## C-index
+#### From AUC/ROC to concordance statistics
 
 Due to the fact that we deal need to be able to deal with censored data, we need to modify the ROC.
 The c- index is the generalization of the ROC for survival data (Cook, N., 2007).
-Alternatively, there are a number of time dependent measures and modification of this method and the ROC curve, interesting for time to event studies. 
-
-### Modifications 
-
-Antolini et al. (2005) propose a time dependent c-index, where discrimination is summarized over time.
-Their model considered the presence of a population feature rather than a shortcoming of the sample. 
-Irrespective, they also agree with the common consent and propose the use the c-index in symbiosis with a tool to measure calibration for model evaluation. 
+Essentially, the c-statistic is equivalent to the probability that the measure or predicted risk is higher for a case than for a non-case. 
+Further, c-statistic describes how well models rank case and non-case, but not a function of predicted probabilities.
+The c-statistic is a rank correlation measure, focusing on Kendall's  tau (Uno et al., 2011). 
+Because c-statistics is based on ranks it is less sensitive than e.g. measures based on likelihood (e.g. loss functions).
+A c-index above the threshold of 0,8 can be considered good (Zhang et al.,2018).
+Alternatively, there are a number of time dependent measures and modification of this method and the AUC/ROC curve, which are  interesting for Time-to-Event studies. 
 
 Heagerty and Zheng (2005) introduce 3 modifications of the AUC, namely the (1) cumulative sensitivity and dynamic specificity (C/D), (2) incident sensitivity and dynamic specificity (I/D) and (3) incident sensitivity and static specificity (I/S).
 
@@ -131,13 +132,28 @@ $$
 C^T = \int^T_0 AUC^{I,D}(t)w^T(t)dt \tag{6}
 $$
 
+### Modifications 
+
+Antolini et al. (2005) propose a time dependent c-index, where discrimination is summarized over time.
+Their model considered the presence of a population feature rather than a shortcoming of the sample. 
+Irrespective, they also agree with the common consent and propose the use the c-index in symbiosis with a tool to measure calibration for model evaluation. 
+
+Uno et al.(2011) propose a modified c-statistic which is consistent for population concordance measures.
+
+
+Further measures via survAUC package:
+
+* Uno's AUC/TPR/TNR
+* Song and Zhou’s AUC/TNR/TPR
+* Chambless and Diao’s AUC
+* Hung and Chiang’s AUC
+
 ##  Advantages 
 
 The c-index has gained popularity because so interpretable (Kattan and Gerds, 2018).
 Especially for the individual patient in diagnostic studies, this method has gained popularity.
-Further, there are lots of modifications of this method.
-
-Performance is not assessed relative to a different model.
+Further, there are many well established packages in R to work with the AUC/ concordance statistics /c-index due to its popularity. 
+Additionally, performance is not assessed relative to a different model.
 Therefore evaluation does not require pairs of patients, which is more realistic. 
 
 ## Disadvantages 
@@ -168,8 +184,6 @@ When dealing with an prognostic analysis, calibration can become an important co
 Calibration captures the accuracy of our predictions of our model.
 One ways to measure calibration is for instance the Hosmer-Lemeshow test, the "goodness of fit" test. (Gerds and Schumacher, 2006). 
 Another popular method is the the integrated brier score, a score that controls for both discrimination and calibration.
-
-Uno et al.(2011) propose a modified c-statistic which is consistent for population concordance measures.
 
 # Brier Score
 
@@ -208,6 +222,11 @@ $$
 L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*) \tag{10}
 $$
 
+### (Integrated) Log loss survival measure/ (Integrated) cross entropy
+
+
+### sBrier Score
+
 Wu and Lee (2014) advocate for the usage of the sBrier score.
 In a nutshell, the sBier score is the mean squared error for the current model divided by the mean squared error for the null model.
 
@@ -224,56 +243,34 @@ Kattan and Gerds (2018) suggest that the evaluation is somewhat problematic with
 The benchmark of the different models are dependent on the overall prevalence of the event in our data set. 
 Henceforth, when working with data where the event rarely takes place, the benchmark becomes convoluted (Kattan and Gerds, 2018).
 
-# Interpretation in Pairs
+### Interpretation in Pairs
 
 One pivotal shortcoming of the method is the inability to compare results independent from other models.
 Hence, one is at best only able to see that the one method is superior to the other models at hand. 
 Especially in a practical setting, when undertaking a diagnosis for a patient this is rather impractical as patients don't come in pairs. 
 
-
-# Clinicial consequences 
+### Clinicial consequences 
 
 We are unable to see whether the implementation of the model is advisable in the first place.
 Steyerberg et al. (2010) argue that one is unable to detect whether the implementation will cause more harm than benefit.
 Therefore, some scholars have advocated for complementary tests, to assess the overall profitability of implementing such measures.
-These complementary tests account for clinical consequences, or in other words more realistic weights given the preferences of clinicians.
-Clinicians usually don't value the different components of model accuracy equally as their clinical consequences are not equivalent. 
-For example, sending a sick patient home, in the believe of being healthy can do more damage than testing further on a healthy patient, that has been tested sick.
+These complementary tests account for clinical consequences.
+Clinicians usually don't value the different components of model evaluation equally as their clinical consequences are not equivalent. 
 
-### Reclassification
+# Complemenary Model Evaluation Metrics
 
-Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010)
-
-* Change is risk stratification.
-* Use observed incidence of events of the reclassification table to predicted probabilities of the orgn. model. 
-* Cook proposing variant og hosmer lemeshow statistic within the reclassified categories, leading to chi-squared statistic.
-
-#### Net Reclassification improvement
+## Net Reclassification improvement
 
 Cook (2008) argues that Net reclassification improvement (NRI) and calibration tests for cross classified categories can be used to study the clinical usefulness. 
 While NRI is only a  measure to study discrimination, it allows to account for the formation of categories based on clinical risk estimates. 
-Therefore, this measure is also focusing on the clinical application, rather than holistic model evaluation.
-Henceforth, reclassification might just complement existing clinicians in practical applications as opposed to providing a dominant model evaluation tools. 
+Henceforth, reclassification complements existing clinicians in practical applications as opposed to providing a dominant model evaluation tools. 
+Integrated discrimination improvement (IDI) is equivalent to testing whether the regression coefficient in a model is equal to zero Cook, N. R., & Ridker, P. M. (2009).
+This is somewhat similar to a R^2 score.
+Cook  and Ridker (2009) point out that  NRI and other reclassification measures depend on the particular categories used.
+Further they suggest that reclassification calibration statistic and NRI both may be useful to demonstrate the ability of new models and markers when altering risk strata.
 
-### Cook, N. R., & Ridker, P. M. (2009). Advances in measuring the effect of individual predictors of cardiovascular risk:
+## Decision Analysis Curve 
 
-* Integrated discrimination improvement 
-* IDI is equivalent to testing whether the regression coefficient in a model is equl to zero (similar to R^2 or the proportion of variance explained)
-* The NRI and the IDI both condition on the case-control or later disease status 
-* A limitation of NRI and other reclassification measures is that they depend on the particular categories used
-* Suggest that reclassification calibration statistic and NRI may be useful in demonstrating the ability of new models and markers to change risk strata and alter treatment decision
-
-### Pencina, M. J., D'Agostino Sr, R. B., D'Agostino Jr, R. B., & Vasan, R. S. (2008). Evaluating the added predictive ability of a new marker: from area under the ROC curve to reclassification and beyond
-
-### Decision Analysis Curve 
-
-One fundamental problem of the methods that we have introduced is that it does not really accommodate the interests of clinicians. 
-From the perspective of a clinician, giving false positive and false negatives the same weight does not make any sense. 
-For instance lets say we result in a false negative for a cancer patient, the patient is harmed to a detrimental extend and deprived of the opportunity to undertake earlier action. 
-Moreover, these methods do not really tell us whether introducing the new model creates added value.
-Further, preferences may differ from a clinical standpoint.
-E.g. sensitivity and specificity are frequently unequal in importance to a clinician.
-Henceforth, scholars have proposed a new complementary framework to assess the net benefit of a model, providing a tool to assess whether implementing a new model is worth it in the first place (Vickers, A., Elkin, E., 2006).
 Decision analysis curve enables the use of weights, allowing optimal decision making based on subjective preferences, embodied in a net benefit equation.
 Further Vickers et al. (2016) illustrate that harm is transformed, using an exchange rate to put harm and benefit on one scale.
 This exchange rate can be obtained by asking clinicians questions based on their subjective preferences such as how many patients they would have undergo a biopsy prior to finding a cancer or weighing the benefits of getting early findings as opposed to the cost of harmful further testing.
@@ -282,35 +279,18 @@ Plotting different exchange rates with the net benefit equation, gives us the de
 The curves enable the practitioner the identification of the rage of threshold probabilities for when a model would be of value, providing information on the necessary benefits needed for a model to be useful and which of many models is optimal (Vickers, A., Elkin, E., 2006).
 One important consideration is that decision analysis curve is a complement, not a substitute to existing models (Vickers, A., Elkin, E., 2006).
 
-
-## Other proposals 
-
-## TOC
-
 # Implementation 
 
 Notable packages: 
-
-'pec':
-
-* cindex()
-* 
-
-'survival': 
-concordance() function 
-
-
+'pec':cindex(),calPlot() 
+'survival': concordance() function 
 'survIDINRI': 
 
 ## Discrimination Plot 
 
-A c-index above the threshold of 0,8 can be considered good (Zhang et al.,2018).
-
 Researchers have combined the usage of reclassification tools with discrimination measures.
 
 ### Net reclassification and integrated discrimination improvement implementation 
-
-One example package dealing
 
 ```{r, include =F}
 data(pbc)
@@ -440,7 +420,7 @@ autoplot(bmr, measure = measure)
 
 # Conclusion 
 
-Time to event studies require adjusted model evaluation tools for censored survival data.
+Time-to-Event studies require adjusted model evaluation tools for censored survival data.
 At the core, studies separate between models that evaluate overall performance, discrimination and calibration.
 Both the c-index for discrimination, and the IBS for discrimination and calibration, are well established tools to undertake model evaluation.
 New methods such as reclassification and clinical usefulness have gained prominence among scholarship.
@@ -448,8 +428,6 @@ New methods such as reclassification and clinical usefulness have gained promine
 # References 
 
 Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimination index for survival data. Statistics in medicine, 24(24), 3927-3944.
-
-Bender, A., Rügamer, D., Scheipl, F., & Bischl, B. (2020). A General Machine Learning Framework for Survival Analysis. arXiv preprint arXiv:2006.15442.
 
 Cook, N. R. (2007). Use and misuse of the receiver operating characteristic curve in risk prediction. Circulation, 115(7), 928-935.
 
@@ -489,8 +467,6 @@ Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussio
 
 Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
 
-Steyerberg, E. W. (2019). Clinical prediction models. Springer International Publishing.
-
 Therneau, T. M., & Lumley, T. (2014). Package ‘survival’. Survival analysis Published on CRAN, 2, 3.
 
 Uno, H., Cai, T., Pencina, M. J., D'Agostino, R. B., & Wei, L. J. (2011). On the C‐statistics for evaluating overall adequacy of risk prediction procedures with censored survival data. Statistics in medicine, 30(10), 1105-1117.
@@ -502,5 +478,3 @@ Vickers, A. J., & Elkin, E. B. (2006). Decision curve analysis: a novel method f
 Vickers, A. J., Van Calster, B., & Steyerberg, E. W. (2016). Net benefit approaches to the evaluation of prediction models, molecular markers, and diagnostic tests. bmj, 352, i6.
 
 Wang, P., Li, Y., & Reddy, C. K. (2019). Machine learning for survival analysis: A survey. ACM Computing Surveys (CSUR), 51(6), 1-36. Chicago	
-
-Wu, Y. C., & Lee, W. C. (2014). Alternative performance measures for prediction models. PLoS One, 9(3), e91249.
