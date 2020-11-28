@@ -72,6 +72,9 @@ Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intui
 * Suggests that one limitation of (index of prediction accuracy; aka calibrated brier score) IPA is that measure using average performance may not reflect improvements that affect a small subset of the population. 
 * Competing risks are mentioned; claim that two patients may have different clinical decisions even when exact same predicted risk of particular event (competing risks)
 
+Snippet Kattan and Gerds (2018) : 
+### Accounting for time: Further Kattan and Gerds (2018) argue that model evaluation needs to account for the time horizon. 
+
 
 # Gerds, T. A., & Schumacher, M. (2006). Consistent estimation of the expected Brier score in general survival models with right‐censored event times
 
@@ -162,6 +165,10 @@ Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intui
 * Solution : **modified c-statistic which is consistent for population concordance measure, free of censoring**
 
 
+
+# Pencina, M. J., D'Agostino Sr, R. B., D'Agostino Jr, R. B., & Vasan, R. S. (2008). Evaluating the added predictive ability of a new marker: from area under the ROC curve to reclassification and beyond. Statistics in medicine, 27(2), 157-172
+
+
 # Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures.
 
 ### Introduction 
@@ -221,6 +228,10 @@ Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intui
 ### Conclusion 
 
 
+### sBrier Score
+
+Wu and Lee (2014) advocate for the usage of the sBrier score.
+In a nutshell, the sBier score is the mean squared error for the current model divided by the mean squared error for the null model.
 
 
 
