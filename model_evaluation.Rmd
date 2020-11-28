@@ -7,9 +7,8 @@ output:
    pdf_document:
     number_sections: true
 citation_package: natbib
-bibliography: [model_evaluation.bib]
+bibliography: [references.bib]
 nocite: '@*'
-abstract: This paper serves as a brief introduction into model evaluation. 
 ---
 
 ```{r setup, include=FALSE}
@@ -74,6 +73,12 @@ Therefore, as the name suggest, we are testing how strong our model discriminate
 Perfect discrimination would imply that all our subjects with the outcome have higher scores than subjects that do not have an outcome.
 One should note that when using a model that only controls for discrimination, our predictive accuracy could be horrible but as long as this condition holds, inaccurate models could be evaluated falsely as superior.
 Prominent tools to study discrimination are the concordance statistics or the net reclassification index. 
+
+## Discrimination Plot 
+
+Researchers have combined the usage of reclassification tools with discrimination measures.
+
+**insert here**
 
 ### Concordance-statistics, Harell's C and the c-index
 
@@ -160,6 +165,9 @@ Further measures via survAUC package:
 * Chambless and Diao’s AUC
 * Hung and Chiang’s AUC
 
+
+**Song, X., & Zhou, X. H. (2008).** A semiparametric approach for the covariate specific ROC curve with survival outcome. Statistica Sinica, 947-965.
+
 ##  Advantages 
 
 The c-index has gained popularity because so interpretable (Kattan and Gerds, 2018).
@@ -193,7 +201,35 @@ This problem holds for both the c-index and the brier score but generally speaki
 
 Calibration captures the accuracy of our predictions of our model which is very important for prediction models.
 One ways to measure calibration is for instance the Hosmer-Lemeshow test, the "goodness of fit" test. (Gerds and Schumacher, 2006). 
+
+Notable mentions:
+* Nagelkerke’s R2
+* O’Quigley, Xu, and Stare’s R2
+* Xu and O’Quigley’s R2
+
 Another popular method is the the integrated brier score, a score that controls for both discrimination and calibration.
+
+## Calibration Plot 
+
+We can use calibration plots to visualize the calibration of our model
+
+The 'pec' packages provides the 'calPlot' function.
+
+```{r, include =F}
+set.seed(18713)
+dat=SimSurv(100)
+pmodel=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE)
+perror=pec(list(Cox=pmodel),Hist(time,status)~1,data=dat)
+## cumulative prediction error
+# crps(perror,times=1) # between min time and 1
+## same thing:
+y<- ibs(perror,times=1) # between min time and 1 crps(perror,times=1,start=0) # between 0 and 1 crps(perror,times=seq(0,1,.2),start=0) # between 0 and seq(0,1,.2)
+```
+
+```{r}
+calPlot(pmodel)
+```
+
 
 # Brier Score
 
@@ -276,6 +312,18 @@ Steyerberg et al. (2010) argue that one is unable to detect whether the implemen
 Therefore, some scholars have advocated for complementary tests accounting for clinical consequences.
 Two prominent tools to account for clinical consequencces are net relcassification improvement and decision analysis curves. 
 
+## mlr3 implementation 
+
+Sonabend et al. (2020) provide a package for the mlr3 framework, namely mlr3proba.
+An useful component is the benchmarking feature of different model evaluation measures.
+The mlr3proba entails 5 different measures directly namely: 
+
+* van Houwelingen’s Alpha Calibration
+* van Houwelingen’s Beta Calibration
+* Integrated Graf Score
+* Integrated Log Loss
+* Log Loss
+
 # Complemenary Model Evaluation Metrics
 
 ## Net Reclassification improvement
@@ -286,27 +334,6 @@ Henceforth, reclassification complements existing clinicians in practical applic
 Integrated discrimination improvement (IDI) is equivalent to testing whether the regression coefficient in a model is equal to zero Cook, N. R., & Ridker, P. M. (2009) (somewhat similar to a R^2 score).
 Cook  and Ridker (2009) point out that there is a dependency between reclassification measures and the categories used.
 Further they suggest that reclassification calibration statistic and NRI both may be useful to demonstrate the ability of new models and markers when altering risk strata.
-
-## Decision Analysis Curve 
-
-Decision analysis curve enables the use of weights, allowing optimal decision making based on subjective preferences, embodied in a net benefit equation.
-Further Vickers et al. (2016) illustrate that harm is transformed, using an exchange rate to put harm and benefit on one scale.
-This exchange rate can be obtained by asking clinicians questions based on their subjective preferences such as how many patients they would have undergo a biopsy prior to finding a cancer or weighing the benefits of getting early findings as opposed to the cost of harmful further testing.
-Together these elements build the net-benefit equation.
-Plotting different exchange rates with the net benefit equation, gives us the decision analysis curve. 
-The curves enable the practitioner the identification of the rage of threshold probabilities for when a model would be of value, providing information on the necessary benefits needed for a model to be useful and which of many models is optimal (Vickers, A., Elkin, E., 2006).
-One important consideration is that decision analysis curve is a complement, not a substitute to existing models (Vickers, A., Elkin, E., 2006).
-
-# Implementation 
-
-Notable packages: 
-'pec':cindex(),calPlot() 
-'survival': concordance() function 
-'survIDINRI': 
-
-## Discrimination Plot 
-
-Researchers have combined the usage of reclassification tools with discrimination measures.
 
 ### Net reclassification and integrated discrimination improvement implementation 
 
@@ -348,93 +375,24 @@ IDI.INF.OUT(res.IDI.INF)
 ## M1 red area; M2 distance between black points; M3 distance between gray points
 ```
 
-## Calibration Plot 
-
-We can use calibration plots to visualize the calibration of our model.
-The 'pec' packages provides the 'calPlot' function.
-
-```{r, include =F}
-set.seed(18713)
-dat=SimSurv(100)
-pmodel=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE)
-perror=pec(list(Cox=pmodel),Hist(time,status)~1,data=dat)
-## cumulative prediction error
-# crps(perror,times=1) # between min time and 1
-## same thing:
-y<- ibs(perror,times=1) # between min time and 1 crps(perror,times=1,start=0) # between 0 and 1 crps(perror,times=seq(0,1,.2),start=0) # between 0 and seq(0,1,.2)
-```
-
-```{r}
-calPlot(pmodel)
-```
-
-## mlr3 implementation 
-
-Sonabend et al. (2020) provide a package for the mlr3 framework, namely mlr3proba.
-An useful component is the benchmarking feature of different model evaluation measures.
-The mlr3proba entails 5 different measures directly namely: 
-
-* van Houwelingen’s Alpha Calibration
-* van Houwelingen’s Beta Calibration
-* Integrated Graf Score
-* Integrated Log Loss
-* Log Loss
-
-Further measures via survAUC package:
-
-* Uno's AUC/TPR/TNR
-* Song and Zhou’s AUC/TNR/TPR
-
-### Song, X., & Zhou, X. H. (2008). A semiparametric approach for the covariate specific ROC curve with survival outcome. Statistica Sinica, 947-965.
-
-* Chambless and Diao’s AUC
-* Hung and Chiang’s AUC
-* Nagelkerke’s R2
-* O’Quigley, Xu, and Stare’s R2
-* Xu and O’Quigley’s R2
-
-```{r,include =F}
-library("mlr3learners")
-library("mlr3")
-library("mlr3proba")
-library("survival")
-library("ranger")
-library("mlr3viz")
-library("survAUC")
-
-TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
-             time = "start", time2 = "stop", type = "interval2")
-
-??tsk()
-
-task = tsk("rats")
-# some integrated learners
-learners = lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
-# print(learners)
-```
 
 
-```{r, include = F}
-measure = msr("surv.graf")
-print(measure)
+## Decision Analysis Curve 
 
-set.seed(1)
-bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
-bmr$aggregate(measure)
-```
+Decision analysis curve enables the use of weights, allowing optimal decision making based on subjective preferences, embodied in a net benefit equation.
+Further Vickers et al. (2016) illustrate that harm is transformed, using an exchange rate to put harm and benefit on one scale.
+This exchange rate can be obtained by asking clinicians questions based on their subjective preferences such as how many patients they would have undergo a biopsy prior to finding a cancer or weighing the benefits of getting early findings as opposed to the cost of harmful further testing.
+Together these elements build the net-benefit equation.
+Plotting different exchange rates with the net benefit equation, gives us the decision analysis curve. 
+The curves enable the practitioner the identification of the rage of threshold probabilities for when a model would be of value, providing information on the necessary benefits needed for a model to be useful and which of many models is optimal (Vickers, A., Elkin, E., 2006).
+One important consideration is that decision analysis curve is a complement, not a substitute to existing models (Vickers, A., Elkin, E., 2006).
 
-```{r}
-autoplot(bmr, measure = measure)
-```
+# Implementation 
 
-```{r, include =F}
-# C-Index for survival
-measure = msr("surv.cindex")
-set.seed(1)
-bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
-bmr$aggregate(measure)
-autoplot(bmr, measure = measure)
-```
+Notable packages: 
+'pec':cindex(),calPlot() 
+'survival': concordance() function 
+'survIDINRI': 
 
 # Conclusion 
 
