@@ -1,0 +1,61 @@
+---
+title: "ref"
+author: "Daniel Saggau"
+date: "11/28/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 
+
+
+Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimination index for survival data. Statistics in medicine, 24(24), 3927-3944.
+
+Cook, N. R. (2007). Use and misuse of the receiver operating characteristic curve in risk prediction. Circulation, 115(7), 928-935.
+
+Cook, N. R. (2008). Statistical evaluation of prognostic versus diagnostic models: beyond the ROC curve. Clinical chemistry, 54(1), 17-23.
+
+Cook, N. R., & Ridker, P. M. (2009). Advances in measuring the effect of individual predictors of cardiovascular risk: the role of reclassification measures. Annals of internal medicine, 150(11), 795-802.
+
+Gerds, T. A., & Schumacher, M. (2006). Consistent estimation of the expected Brier score in general survival models with right‐censored event times. Biometrical Journal, 48(6), 1029-1040.
+
+Gerds, T. A., Cai, T., & Schumacher, M. (2008). The performance of risk prediction models. Biometrical Journal: Journal of Mathematical Methods in Biosciences, 50(4), 457-479.
+
+Gerds, T. A. (2019). Package ‘pec’.
+
+Graf, E., Schmoor, C., Sauerbrei, W., & Schumacher, M. (1999). Assessment and comparison of prognostic classification schemes for survival data. Statistics in medicine, 18(17‐18), 2529-2545.
+
+Harrell Jr, F. E., Lee, K. L., & Mark, D. B. (1996). Multivariable prognostic models: issues in developing models, evaluating assumptions and adequacy, and measuring and reducing errors. Statistics in medicine, 15(4), 361-387.
+Chicago	
+
+Heagerty, P. J., Lumley, T., & Pepe, M. S. (2000). Time‐dependent ROC curves for censored survival data and a diagnostic marker. Biometrics, 56(2), 337-344.
+
+Hung, H., & Chiang, C. T. (2010). Estimation methods for time‐dependent AUC models with survival data. Canadian Journal of Statistics, 38(1), 8-26.
+Chicago	
+
+Kamarudin, A. N., Cox, T., & Kolamunnage-Dona, R. (2017). Time-dependent ROC curve analysis in medical research: current methods and applications. BMC medical research methodology, 17(1), 53.
+
+Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
+
+Potapov, S., Adler, W., & Schmid, M. (2012). survAUC: Estimators of prediction accuracy for time-to-event data. R package version, 1-0.
+
+Schoop, R., Beyersmann, J., Schumacher, M., & Binder, H. (2011). Quantifying the predictive accuracy of time‐to‐event models in the presence of competing risks. Biometrical Journal, 53(1), 88-112.
+
+Sonabend, R., Király, F. J., Bender, A., Bischl, B., & Lang, M. (2020). mlr3proba: Machine Learning Survival Analysis in R. arXiv preprint arXiv:2008.08080.
+
+Steyerberg, E. W., & Vickers, A. J. (2008). Decision curve analysis: a discussion. Medical Decision Making, 28(1), 146-149.
+
+Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
+
+Therneau, T. M., & Lumley, T. (2014). Package ‘survival’. Survival analysis Published on CRAN, 2, 3.
+
+Uno, H., Cai, T., Pencina, M. J., D'Agostino, R. B., & Wei, L. J. (2011). On the C‐statistics for evaluating overall adequacy of risk prediction procedures with censored survival data. Statistics in medicine, 30(10), 1105-1117.
+
+van Houwelingen, H. C. (2000). Validation, calibration, revision and combination of prognostic survival models. Statistics in medicine, 19(24), 3401-3415.
+
+Vickers, A. J., & Elkin, E. B. (2006). Decision curve analysis: a novel method for evaluating prediction models. Medical Decision Making, 26(6), 565-574.
+
+Vickers, A. J., Van Calster, B., & Steyerberg, E. W. (2016). Net benefit approaches to the evaluation of prediction models, molecular markers, and diagnostic tests. bmj, 352, i6.
