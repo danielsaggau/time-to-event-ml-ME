@@ -1,5 +1,5 @@
 ---
-title: "Survival-ML"
+title: "Model Evaluation for Time-to-Event Studies"
 author: "Daniel Saggau"
 date: "11/15/2020"
 output:
@@ -12,26 +12,111 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## R Markdown
 
+## Time-to Event Studies 
+
+- Analysis working with right censored data
+- Highly relevant for clinicians in the field of medical statistics e.g. looking at when a patient dies or when he gets a disease (clinical/epidemiological studies)
+- Applications in other fields e.g. economics/finance to examine when a subject will default or when a subject will find a job 
+
+## Cornerstones of Model Evaluation
+
+(1) *What type of study are we dealing with?*
+
+**Diagnostic vs. Prognostic Study**
+
+(2) *What are the components of our model evaluation metric?*
+
+**Discrimination**:
+How well are we able to classify subjects ? Are we able to correctly discriminate between e.g. sick and healthy patients ?
+
+**Calibration**:
+How concise is our prediction accuracy ?
+More recently also:
+
+**Clinical Usefulness**: 
+Does it make sense to implement our model in the first place? Will our model create more benefits than harm? 
 
 ## Pillars within the field of model evaluation
 
-- ROC (AUC)
-- C-Statistic
+- ROC (AUC) - (Mis-)classification rates
+- Mean squared error - Probabilistic measure
 
-### ROC
+- **Problem**: unable to deal with censored data
 
-### C-Statistic
+Early approaches:
+ - excluding subjects with right censored data and only evaluate on the complete data
+ - 
 
-## Model Evaluation tailored for Survival Data 
+## mlr3 Proba Applications: 
 
-##
+* van Houwelingen’s Alpha Calibration
+* van Houwelingen’s Beta Calibration
+* Integrated Graf Score
+* Integrated Log Loss
+* Log Loss
+
+Further measures via survAUC package:
+
+* Uno's AUC/TPR/TNR
+* Song and Zhou’s AUC/TNR/TPR
+* Chambless and Diao’s AUC
+* Hung and Chiang’s AUC
+
+## ROC
+
+- origin in ww2
+- Sensitivity vs Specificity 
+- 
+
+## From ROC to C-Statistic to C-index
+
+- Advancement of ROC/AUC
+- Further modification leads to c-index
+- concordance pairs divided
+- Harell's C
 
 
-## Plotting different Methods 
+## Further Modifications of the c-statistics
+
+- Uno's C   
+- Harell's C 
+- 
+
+## Plotting Discrimination 
 
 ```{r}
 
 ```
+
+
+## MSE
+
+
+## IBS
+
+For the Individual: 
+
+$$L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})]$$
+Mean Population: 
+
+$$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*)$$
+
+## Literature on IBS:
+
+Introduction: 
+
+
+
+
+- Graf, E., Schmoor, C., Sauerbrei, W., & Schumacher, M. (1999). Assessment and comparison of prognostic classification schemes for survival data. Statistics in medicine, 18(17‐18), 2529-2545.
+
+Comparative Study: 
+- 
+
+
+
+## Plotting Calibration 
+
+## Plotting Predicition error curve 
 
