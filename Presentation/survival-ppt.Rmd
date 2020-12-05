@@ -1,11 +1,12 @@
 ---
-title: "Model Evaluation for Time-to-Event Studies"
+title: "Model Evaluation"
+subtitle: "Considerations for Time-to-Event Studies"
 author: "Daniel Saggau"
 date: "11/15/2020"
 output:
+  ioslides_presentation: default
   slidy_presentation: default
   powerpoint_presentation: default
-  ioslides_presentation: default
 ---
 
 ```{r setup, include=FALSE}
@@ -13,33 +14,29 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
+## Overview
+
+* Introduction to Time to Event Data
+* Introduction to classical Model Evaluation Tools 
+* Integrated Brier Score
+* Concordance-Index
+* Discussion 
+* R- Implementation
+* Advancements & Novel Considerations
+* Recommendation
+
 ## Time-to Event Studies 
 
 - Analysis working with right censored data
 - Highly relevant for clinicians in the field of medical statistics e.g. looking at when a patient dies or when he gets a disease (clinical/epidemiological studies)
 - Applications in other fields e.g. economics/finance to examine when a subject will default or when a subject will find a job 
 
-## Classical Model Evaluation Tools 
+## Basic structure 
 
-* Classification Tasks
-* Regression Tasks
-
-### Brier Score 
-
-
-
-### ROC/AUC/Concordance Statistics 
-
-
-
-## Brier Score - Methods
-
-## ROC/AUC/Concordance Statistics - Methods 
-
-## Why cant we use traditional model evaluation tools for time to event studies?
-
-* Working with censored data 
-* Changes over time 
+* Time T and Survival S
+* hazard h(t,x) to risk r(x)
+* Capital H is the cumulative hazard
+* 
 
 ## Cornerstones of Model Evaluation with Time to Event Studies
 
@@ -59,16 +56,93 @@ More recently also:
 **Clinical Usefulness**: 
 Does it make sense to implement our model in the first place? Will our model create more benefits than harm? 
 
-## Pillars within the field of model evaluation
 
-- ROC (AUC) - (Mis-)classification rates
-- Mean squared error - Probabilistic measure
+## Classical Model Evaluation Tools 
 
-- **Problem**: unable to deal with censored data
+**Classification Tasks**
+
+* Brier Score (probability from true class label)
+* Brier Score for ()
+* Mis-classification Error rate (rate of incorrect classification)
+* ROC (receiver operating characteristics)
+* ACC (rate of correct classifications)
+
+**Regression Tasks**
+
+* Mean Absolute Error (mean absolute error)
+* Mean Squared Error
+* Brier Score 
+* R^2 
+
+### Brier Score 
+
+* Specific Point in time 
+
+Brier Score 1 
+
+
+
+Brier Score 2 
+
+
+
+
+
+
+
+### Confusion Matrix
+
+**Sensitivity**:
+
+* deals with values above the threshold among the subject group which do endure an event 
+* Another common name for Sensitivity is the true positive rate.
+
+$TPF = \frac{TP}{TP+FN}$
+
+**Specificity**:
+
+* deals with false negatives, hence patients with a disease we classify as not having any diseases
+* Another name for specificity is the true negative rate 
+
+$TNR = \frac{TN}{TN+FP}$
+
+
+## Brier Score - Methods
+
+
+
+## ROC/AUC/Concordance Statistics - Methods 
+
+## Why cant we use traditional model evaluation tools for time to event studies?
+
+* Working with censored data 
+* We need to estimate survival of patients without having data on e.g. death
+* Summary measure over time for comparability between models 
+
 
 Early approaches:
  - excluding subjects with right censored data and only evaluate on the complete data
  - 
+
+
+
+
+
+
+
+
+## From ROC to C-Statistic to C-index
+
+- Advancement of ROC/AUC
+- Further modification leads to c-index
+- concordance pairs divided
+- Harell's C
+
+
+## Further Modifications of the c-statistics
+
+- Uno's C   
+- Harell's C 
 
 ## mlr3 Proba Applications: 
 
@@ -85,26 +159,6 @@ Further measures via survAUC package:
 * Chambless and Diao’s AUC
 * Hung and Chiang’s AUC
 
-## ROC
-
-- origin in ww2
-- Sensitivity vs Specificity 
-- 
-
-## From ROC to C-Statistic to C-index
-
-- Advancement of ROC/AUC
-- Further modification leads to c-index
-- concordance pairs divided
-- Harell's C
-
-
-## Further Modifications of the c-statistics
-
-- Uno's C   
-- Harell's C 
-- 
-
 ## Plotting Discrimination 
 
 ```{r}
@@ -112,33 +166,77 @@ Further measures via survAUC package:
 ```
 
 
-## MSE
+## C-index
 
+* Summary measure (over all time) based on the AUC  
 
 ## IBS
+
+* Integral over all points in time to get one summary value henceforth called "integrated" BS
+*
 
 For the Individual: 
 
 $$L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})]$$
+* Where L is a loss function of the S(the probability that the event of interest has not taken place yet) and time
+* t is the time of the event (death) and t* the time before death
+* G(t) is the P(C>t), so where the censored time is longer than the time (in mlr3proba via survfit == KM Estimate)
+* 
+
+* When selecting integrated == FALSE then we looking at specific time 
+* 
+
+For the population mean:
+
+$$
+L(S,t|t^*) = \frac{1}{N}\displaystyle\sum^N_{i=1}L(S_i,t_i|t^*) \tag{9}
+$$
+
 Mean Population: 
 
 $$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*)$$
 
-## Literature on IBS:
+* N = Number of observations 
+* S_i is the predicted survival function 
+
+If we take 
+
+
+## Discussion 
+
+* Integrated Brier Score accounts for both calibration and discrimination
+* 
+* Irrespective, neither model accounts and leaves room for improvement 
+* 
+
+
+## Literature
 
 Introduction: 
 
+- Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
 
-
+Brier Score: 
 
 - Graf, E., Schmoor, C., Sauerbrei, W., & Schumacher, M. (1999). Assessment and comparison of prognostic classification schemes for survival data. Statistics in medicine, 18(17‐18), 2529-2545.
 
-Comparative Study: 
+Advanced Literature on C-index:
+
+- Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimination index for survival data. Statistics in medicine, 24(24), 3927-3944.
+
+- Uno, H., Cai, T., Pencina, M. J., D'Agostino, R. B., & Wei, L. J. (2011). On the C‐statistics for evaluating overall adequacy of risk prediction procedures with censored survival data. Statistics in medicine, 30(10), 1105-1117.
+
 - 
+
+Comparative Study: 
+
+- Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
 
 
 
 ## Plotting Calibration 
+
+
 
 ## Plotting Predicition error curve 
 
