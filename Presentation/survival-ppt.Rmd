@@ -29,14 +29,15 @@ knitr::opts_chunk$set(echo = FALSE)
 
 - Analysis working with right censored data
 - Highly relevant for clinicians in the field of medical statistics e.g. looking at when a patient dies or when he gets a disease (clinical/epidemiological studies)
-- Applications in other fields e.g. economics/finance to examine when a subject will default or when a subject will find a job 
+- In Economics/finance e.g. to examine when a subject/borrower will default or when a subject will find/lose a job 
+- Operations research to predict the time a machine will break 
 
 ## Basic structure 
 
 * Time T and Survival S
 * hazard h(t,x) to risk r(x)
 * Capital H is the cumulative hazard
-* 
+*
 
 ## Cornerstones of Model Evaluation with Time to Event Studies
 
@@ -122,13 +123,6 @@ $TNR = \frac{TN}{TN+FP}$
 
 Early approaches:
  - excluding subjects with right censored data and only evaluate on the complete data
- - 
-
-
-
-
-
-
 
 
 ## From ROC to C-Statistic to C-index
@@ -138,11 +132,18 @@ Early approaches:
 - concordance pairs divided
 - Harell's C
 
+## c-index 
 
-## Further Modifications of the c-statistics
+* studying pairs of subjects
+* 
+* addressing right censored data via inverse of the probability of censoring weighted estimate of the concordance probability
+* kendall's tau 
+* Summary measure (over all time) based on the AUC  
 
-- Uno's C   
-- Harell's C 
+$C-index = \frac{\Delta_j \times \sum_{i,j}1_{Ti>Tj} \times 1_{\eta_i>\eta_j}} {\Delta_j \times \sum_{i,j}1_{Ti>Tj}}$
+
+* where 1 are indicator-functions: 
+* 
 
 ## mlr3 Proba Applications: 
 
@@ -166,18 +167,19 @@ Further measures via survAUC package:
 ```
 
 
-## C-index
-
-* Summary measure (over all time) based on the AUC  
-
 ## IBS
 
+* called cumulative predictive error curves == continuous ranked probability score (crps)
+* area under the prediction error curve
 * Integral over all points in time to get one summary value henceforth called "integrated" BS
-*
+* able to build a R^2 like measure where we divide MSE of a model with a different MSE of reference model 
 
 For the Individual: 
 
-$$L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})]$$
+$$L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})]$$ \newline
+$$+ [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})]$$
+
+
 * Where L is a loss function of the S(the probability that the event of interest has not taken place yet) and time
 * t is the time of the event (death) and t* the time before death
 * G(t) is the P(C>t), so where the censored time is longer than the time (in mlr3proba via survfit == KM Estimate)
@@ -186,13 +188,13 @@ $$L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*
 * When selecting integrated == FALSE then we looking at specific time 
 * 
 
-For the population mean:
+## For the population mean:
 
 $$
 L(S,t|t^*) = \frac{1}{N}\displaystyle\sum^N_{i=1}L(S_i,t_i|t^*) \tag{9}
 $$
 
-Mean Population: 
+### Mean Population: 
 
 $$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*)$$
 

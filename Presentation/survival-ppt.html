@@ -3164,7 +3164,8 @@ slide:not(.current) .plotly.html-widget{
 <ul>
 <li>Analysis working with right censored data</li>
 <li>Highly relevant for clinicians in the field of medical statistics e.g. looking at when a patient dies or when he gets a disease (clinical/epidemiological studies)</li>
-<li>Applications in other fields e.g. economics/finance to examine when a subject will default or when a subject will find a job</li>
+<li>In Economics/finance e.g. to examine when a subject/borrower will default or when a subject will find/lose a job</li>
+<li>Operations research to predict the time a machine will break</li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2>Basic structure</h2></hgroup><article  id="basic-structure">
@@ -3173,6 +3174,7 @@ slide:not(.current) .plotly.html-widget{
 <li>Time T and Survival S</li>
 <li>hazard h(t,x) to risk r(x)</li>
 <li>Capital H is the cumulative hazard</li>
+<li></li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2>Cornerstones of Model Evaluation with Time to Event Studies</h2></hgroup><article  id="cornerstones-of-model-evaluation-with-time-to-event-studies">
@@ -3256,7 +3258,7 @@ slide:not(.current) .plotly.html-widget{
 <li>Summary measure over time for comparability between models</li>
 </ul>
 
-<p>Early approaches: - excluding subjects with right censored data and only evaluate on the complete data -</p>
+<p>Early approaches: - excluding subjects with right censored data and only evaluate on the complete data</p>
 
 </article></slide><slide class=""><hgroup><h2>From ROC to C-Statistic to C-index</h2></hgroup><article  id="from-roc-to-c-statistic-to-c-index">
 
@@ -3267,11 +3269,13 @@ slide:not(.current) .plotly.html-widget{
 <li>Harell’s C</li>
 </ul>
 
-</article></slide><slide class=""><hgroup><h2>Further Modifications of the c-statistics</h2></hgroup><article  id="further-modifications-of-the-c-statistics">
+</article></slide><slide class=""><hgroup><h2>c-index</h2></hgroup><article  id="c-index">
+
+<p>\(C-index = \frac{\Delta_j \times \sum_{i,j}1_{Ti&gt;Tj} \times 1_{\eta_i&gt;\eta_j}} {\Delta_j \times \sum_{i,j}1_{Ti&gt;Tj}}\)</p>
 
 <ul>
-<li>Uno’s C<br/></li>
-<li>Harell’s C</li>
+<li>where 1 are indicator-functions:</li>
+<li></li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2>mlr3 Proba Applications:</h2></hgroup><article  id="mlr3-proba-applications">
@@ -3287,16 +3291,15 @@ slide:not(.current) .plotly.html-widget{
 <p>Further measures via survAUC package:</p>
 
 <ul>
-<li><p>Uno’s AUC/TPR/TNR</p></li>
-<li><p>Song and Zhou’s AUC/TNR/TPR</p></li>
-<li><p>Chambless and Diao’s AUC</p></li>
-<li><p>Hung and Chiang’s AUC</p></li>
-<li></li>
+<li>Uno’s AUC/TPR/TNR</li>
+<li>Song and Zhou’s AUC/TNR/TPR</li>
+<li>Chambless and Diao’s AUC</li>
+<li>Hung and Chiang’s AUC</li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2>Plotting Discrimination</h2></hgroup><article  id="plotting-discrimination">
 
-</article></slide><slide class=""><hgroup><h2>C-index</h2></hgroup><article  id="c-index">
+</article></slide><slide class=""><hgroup><h2>C-index</h2></hgroup><article  id="c-index-1">
 
 <ul>
 <li>Summary measure (over all time) based on the AUC</li>
@@ -3305,22 +3308,49 @@ slide:not(.current) .plotly.html-widget{
 </article></slide><slide class=""><hgroup><h2>IBS</h2></hgroup><article  id="ibs">
 
 <ul>
+<li>called cumulative predictive error curves == continuous ranked probability score (crps)</li>
+<li>area under the prediction error curve</li>
 <li>Integral over all points in time to get one summary value henceforth called &ldquo;integrated&rdquo; BS</li>
-<li></li>
+<li>able to build a R^2 like measure where we divide MSE of a model with a different MSE of reference model</li>
 </ul>
 
 <p>For the Individual:</p>
 
-<p>\[L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t&gt;t^*)(\frac{1}{G(t^*)})]\] * Where L is a loss function of the S(the probability that the event of interest has not taken place yet) and time * G(t) is the P(C&gt;t), so where the censored time is longer than the time *</p>
+<p>\[L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})]\]  \[+ [((1-S(t^*))^2)I(t&gt;t^*)(\frac{1}{G(t^*)})]\]</p>
 
-<p>Mean Population:</p>
+<ul>
+<li>Where L is a loss function of the S(the probability that the event of interest has not taken place yet) and time</li>
+<li>t is the time of the event (death) and t* the time before death</li>
+<li>G(t) is the P(C&gt;t), so where the censored time is longer than the time (in mlr3proba via survfit == KM Estimate)</li>
+<li></li>
+<li>When selecting integrated == FALSE then we looking at specific time</li>
+<li></li>
+</ul>
+
+</article></slide><slide class=""><hgroup><h2>For the population mean:</h2></hgroup><article  id="for-the-population-mean">
+
+<p>\[
+L(S,t|t^*) = \frac{1}{N}\displaystyle\sum^N_{i=1}L(S_i,t_i|t^*) \tag{9}
+\]</p>
+
+<h3>Mean Population:</h3>
 
 <p>\[L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*)\]</p>
+
+<ul>
+<li>N = Number of observations</li>
+<li>S_i is the predicted survival function</li>
+</ul>
+
+<p>If we take</p>
 
 </article></slide><slide class=""><hgroup><h2>Discussion</h2></hgroup><article  id="discussion">
 
 <ul>
-<li>Integrated Brier Score accounts for both calibration</li>
+<li>Integrated Brier Score accounts for both calibration and discrimination</li>
+<li></li>
+<li>Irrespective, neither model accounts and leaves room for improvement</li>
+<li></li>
 </ul>
 
 </article></slide><slide class=""><hgroup><h2>Literature</h2></hgroup><article  id="literature">

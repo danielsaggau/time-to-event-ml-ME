@@ -165,7 +165,6 @@ The c-index has gained popularity because of it's interpretability (Kattan and G
 Especially for the individual patient in diagnostic studies, this method has gained popularity.
 Further, there are many well established packages in R to work with the AUC/ concordance statistics /c-index due to its popularity. 
 Additionally, performance is not assessed relative to a different model.
-Therefore evaluation does not require pairs of patients, which is more realistic. 
 
 ## Disadvantages 
 
@@ -313,7 +312,7 @@ Henceforth, when working with data where the event rarely takes place, the bench
 **Interpretation:**
 One pivotal shortcoming of the method is the inability to compare results independent from other models.
 Hence, one is at best only able to see that the one method is superior to the other models at hand. 
-Especially in a practical setting, when undertaking a diagnosis for a patient this is rather impractical as patients don't come in pairs.  
+
 **Clinicial consequences**
 Clinicians usually don't value the different components of model evaluation equally as their clinical consequences are not equivalent.
 Further, we are unable to see whether the implementation of the model is advisable in the first place.
