@@ -35,11 +35,12 @@ knitr::opts_chunk$set(echo = FALSE)
 ## Basic structure 
 
 * Time T and Survival S
-* hazard h(t,x) to risk r(x)
+* Hazard h(t,x) to risk r(x)
 * Capital H is the cumulative hazard
-*
+* semi-parametric hazard models (KM) vs. non-parametric proportional hazard model
 
-## Cornerstones of Model Evaluation with Time to Event Studies
+
+## Model Evaluation - Considerations
 
 (1) *What type of study are we dealing with?*
 
@@ -56,7 +57,6 @@ More recently also:
 
 **Clinical Usefulness**: 
 Does it make sense to implement our model in the first place? Will our model create more benefits than harm? 
-
 
 ## Classical Model Evaluation Tools 
 
@@ -79,14 +79,12 @@ Does it make sense to implement our model in the first place? Will our model cre
 
 * Specific Point in time 
 
+
 Brier Score 1 
 
 
 
 Brier Score 2 
-
-
-
 
 
 
@@ -160,10 +158,33 @@ Further measures via survAUC package:
 * Chambless and Diao’s AUC
 * Hung and Chiang’s AUC
 
-## Plotting Discrimination 
 
 ```{r}
+library(prodlim)
+ library(survival)
+ install.packages("randomForestSRC")
+ library(randomForestSRC)
+ set.seed(13)
+ dat <- SimSurv(500)
+ # fit three different Cox models and a random survival forest
+ cox12 <- coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE)
+ cox1 <- coxph(Surv(time,status)~X1,data=dat,x=TRUE,y=TRUE)
+ cox2 <- coxph(Surv(time,status)~X2,data=dat,x=TRUE,y=TRUE)
+ rsf1 <- rfsrc(Surv(time,status)~X1+X2,data=dat,ntree=15,forest=TRUE)
 
+A1  <- pec::cindex(list("Cox X1"=cox1, "RSF"=rsf1),
+formula=Surv(time,status)~X1+X2,
+data=dat,
+eval.times=10)
+ApparrentCindex  <- pec::cindex(list("Cox X1"=cox1,
+"Cox X2"=cox2,
+"Cox X1+X2"=cox12,
+"RSF"=rsf1),
+formula=Surv(time,status)~X1+X2,
+data=dat,
+eval.times=seq(1,15,1))
+  print(ApparrentCindex)
+  plot(ApparrentCindex)
 ```
 
 
@@ -201,7 +222,7 @@ $$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(
 * N = Number of observations 
 * S_i is the predicted survival function 
 
-## If we take 
+## If we take
 
 ```{r, include =F}
 set.seed(130971)
@@ -209,6 +230,20 @@ library(prodlim)
 library(survival)
 library(pec)
 ```
+ 
+```{r}
+set.seed(18713)
+dat=SimSurv(100)
+pmodel=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE)
+perror=pec(list(Cox=pmodel),Hist(time,status)~1,data=dat)
+## cumulative prediction error
+# crps(perror,times=1) # between min time and 1
+## same thing:
+y<- ibs(perror,times=1) # between min time and 1 crps(perror,times=1,start=0) # between 0 and 1 crps(perror,times=seq(0,1,.2),start=0) # between 0 and seq(0,1,.2)
+plot(perror)
+calPlot(pmodel)
+```
+
 
 
 ```{r}
@@ -228,6 +263,7 @@ print(PredError,times=seq(1,15,1))
 summary(PredError)
 ```
 
+
 ## Plotting the whole damn thing
 
 ```{r}
@@ -238,9 +274,7 @@ plot(PredError,xlim=c(0,20), ylim = c(0,1))
 ## Discussion 
 
 * Integrated Brier Score accounts for both calibration and discrimination
-* 
 * Irrespective, neither model accounts and leaves room for improvement 
-* 
 
 
 ## Literature
@@ -253,23 +287,13 @@ Brier Score:
 
 - Graf, E., Schmoor, C., Sauerbrei, W., & Schumacher, M. (1999). Assessment and comparison of prognostic classification schemes for survival data. Statistics in medicine, 18(17‐18), 2529-2545.
 
-Advanced Literature on C-index:
+## Advanced Literature on C-index:
 
 - Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimination index for survival data. Statistics in medicine, 24(24), 3927-3944.
 
 - Uno, H., Cai, T., Pencina, M. J., D'Agostino, R. B., & Wei, L. J. (2011). On the C‐statistics for evaluating overall adequacy of risk prediction procedures with censored survival data. Statistics in medicine, 30(10), 1105-1117.
 
-- 
-
-Comparative Study: 
+## Comparative Study: 
 
 - Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
-
-
-
-## Plotting Calibration 
-
-
-
-## Plotting Predicition error curve 
 
