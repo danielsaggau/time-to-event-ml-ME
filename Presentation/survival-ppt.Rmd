@@ -19,7 +19,29 @@ knitr::opts_chunk$set(echo = FALSE)
 - Highly relevant for clinicians in the field of medical statistics e.g. looking at when a patient dies or when he gets a disease (clinical/epidemiological studies)
 - Applications in other fields e.g. economics/finance to examine when a subject will default or when a subject will find a job 
 
-## Cornerstones of Model Evaluation
+## Classical Model Evaluation Tools 
+
+* Classification Tasks
+* Regression Tasks
+
+### Brier Score 
+
+
+
+### ROC/AUC/Concordance Statistics 
+
+
+
+## Brier Score - Methods
+
+## ROC/AUC/Concordance Statistics - Methods 
+
+## Why cant we use traditional model evaluation tools for time to event studies?
+
+* Working with censored data 
+* Changes over time 
+
+## Cornerstones of Model Evaluation with Time to Event Studies
 
 (1) *What type of study are we dealing with?*
 
