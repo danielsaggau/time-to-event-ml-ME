@@ -13,7 +13,6 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-
 ## Overview
 
 * Introduction to Time to Event Data
@@ -35,10 +34,11 @@ knitr::opts_chunk$set(echo = FALSE)
 ## Basic structure 
 
 * Time T and Survival S
-* Hazard h(t,x) to risk r(x)
+* Hazard h(t,x) is the eminent probability of death a specific point in time 
+* 
 * Capital H is the cumulative hazard
-* semi-parametric hazard models (KM) vs. non-parametric proportional hazard model
-
+* non-parametric hazard models (KM) vs.semi-parametric proportional hazard model
+* Survival Probability
 
 ## Model Evaluation - Considerations
 
@@ -79,14 +79,9 @@ Does it make sense to implement our model in the first place? Will our model cre
 
 * Specific Point in time 
 
-
 Brier Score 1 
 
-
-
 Brier Score 2 
-
-
 
 
 ### Confusion Matrix
@@ -105,29 +100,28 @@ $TPF = \frac{TP}{TP+FN}$
 
 $TNR = \frac{TN}{TN+FP}$
 
-
 ## Brier Score - Methods
-
-
 
 ## ROC/AUC/Concordance Statistics - Methods 
 
 ## Why cant we use traditional model evaluation tools for time to event studies?
 
-* Working with censored data 
+* Working with censored data
+``
+* Right censored data (event after follow up) vs. left censored data (event was not recorded when it occured intially)
 * We need to estimate survival of patients without having data on e.g. death
-* Summary measure over time for comparability between models 
-
+* Also, we need to provide measure over time
 
 Early approaches:
  - excluding subjects with right censored data and only evaluate on the complete data
-
 
 ## From ROC to C-Statistic to C-index
 
 - Advancement of ROC/AUC
 - Further modification leads to c-index
 - concordance pairs divided
+- concordance == x1>x2-> y1>y2
+- 
 - Harell's C
 
 ## c-index 
@@ -140,8 +134,7 @@ Early approaches:
 
 $C-index = \frac{\Delta_j \times \sum_{i,j}1_{Ti>Tj} \times 1_{\eta_i>\eta_j}} {\Delta_j \times \sum_{i,j}1_{Ti>Tj}}$
 
-* where 1 are indicator-functions: 
-* 
+* Where 1 are indicator-functions: 
 
 ## mlr3 Proba Applications: 
 
@@ -161,9 +154,8 @@ Further measures via survAUC package:
 
 ```{r}
 library(prodlim)
- library(survival)
- install.packages("randomForestSRC")
- library(randomForestSRC)
+library(survival)
+library(randomForestSRC)
  set.seed(13)
  dat <- SimSurv(500)
  # fit three different Cox models and a random survival forest
@@ -187,7 +179,6 @@ eval.times=seq(1,15,1))
   plot(ApparrentCindex)
 ```
 
-
 ## IBS
 
 * called cumulative predictive error curves == continuous ranked probability score (crps)
@@ -204,10 +195,8 @@ $$+ [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})]$$
 * Where L is a loss function of the S(the probability that the event of interest has not taken place yet) and time
 * t is the time of the event (death) and t* the time before death
 * G(t) is the P(C>t), so where the censored time is longer than the time (in mlr3proba via survfit == KM Estimate)
-* 
 
 * When selecting integrated == FALSE then we looking at specific time 
-* 
 
 ## For the population mean:
 
@@ -244,8 +233,6 @@ plot(perror)
 calPlot(pmodel)
 ```
 
-
-
 ```{r}
 dat <- SimSurv(1000)
 
@@ -263,19 +250,16 @@ print(PredError,times=seq(1,15,1))
 summary(PredError)
 ```
 
-
 ## Plotting the whole damn thing
 
 ```{r}
 plot(PredError,xlim=c(0,20), ylim = c(0,1))
 ```
 
-
 ## Discussion 
 
 * Integrated Brier Score accounts for both calibration and discrimination
 * Irrespective, neither model accounts and leaves room for improvement 
-
 
 ## Literature
 
