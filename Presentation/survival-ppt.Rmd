@@ -38,6 +38,10 @@ knitr::opts_chunk$set(echo = FALSE)
 * 
 * Capital H is the cumulative hazard
 * non-parametric hazard models (KM) vs.semi-parametric proportional hazard model
+<<<<<<< HEAD
+=======
+* From hazard to cumulative hazard to survival 
+>>>>>>> f8f4db3330071efd4a1c0bbfe82657be0668046c
 * Survival Probability
 
 ## Model Evaluation - Considerations
