@@ -123,20 +123,7 @@ $C-index = \frac{\Delta_j \times \sum_{i,j}1_{Ti>Tj} \times 1_{\eta_i>\eta_j}} {
 
 * Where 1 are indicator-functions: 
 
-## mlr3 Proba Applications: 
 
-* van Houwelingen’s Alpha Calibration 
-* van Houwelingen’s Beta Calibration
-* Integrated Graf Score (other Name for IBS based on Author Graf)
-* Integrated Log Loss
-* Log Loss
-
-Further measures via survAUC package:
-
-* Uno's AUC/TPR/TNR
-* Song and Zhou’s AUC/TNR/TPR
-* Chambless and Diao’s AUC
-* Hung and Chiang’s AUC
 
 ```{r}
 library(prodlim)
@@ -224,7 +211,7 @@ summary(perror,times=seq(0,20,5))
 plot(perror,xlim=c(0,25), ylim = c(0,1))
 ```
 
-## Cumulative Prediction Error Curve 
+## Cumulative Prediction Error 
 
 ```{r}
 crps(perror,times=seq(0,20,5))
@@ -238,9 +225,24 @@ cindex <- cindex(models,formula = Surv(time,status) ~ 1, cens.model="marginal", 
 plot(cindex)
 ```
 
-# mlr3Proba 
+## mlr3Proba 
 
-```{r}
+* van Houwelingen’s Alpha Calibration 
+* van Houwelingen’s Beta Calibration
+* Integrated Graf Score (other Name for IBS based on Author Graf)
+* Integrated Log Loss
+* Log Loss
+
+Further measures via survAUC package:
+
+* Uno's AUC/TPR/TNR
+* Song and Zhou’s AUC/TNR/TPR
+* Chambless and Diao’s AUC
+* Hung and Chiang’s AUC
+
+## mlr3Proba Example
+
+```{r, include =F}
 library("mlr3learners")
 library("mlr3")
 library("mlr3proba")
@@ -257,27 +259,37 @@ learners = lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
 # print(learners)
 
 # Harrell's C-Index for survival
-measure = msr("surv.cindex")
+measure = msr("surv.graf")
 print(measure)
 
 set.seed(1)
 bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
 bmr$aggregate(measure)
+```
+
+```{r}
 autoplot(bmr, measure = measure)
 ```
+
 
 ## Discussion 
 
 * Integrated Brier Score accounts for both calibration and discrimination
 * Irrespective, neither model accounts and leaves room for improvement 
 
-## Literature
+## Literature and Recommendations 
 
-**Introduction:**
+Introduction:
 
-- Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
+* Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
 
-**Comparative Study:**
+Comparative Study:
 
-- Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
+* Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
 
+Use Cases:
+
+https://rpubs.com/kaz_yos/survival-auc
+https://datascienceplus.com/time-dependent-roc-for-survival-prediction-models-in-r/
+https://rdrr.io/cran/pec/
+https://adibender.github.io/pammtools/
