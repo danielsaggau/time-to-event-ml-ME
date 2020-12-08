@@ -1,12 +1,13 @@
 ---
 title: "Model Evaluation"
-subtitle: "Considerations for Time-to-Event Studies"
 author: "Daniel Saggau"
 date: "11/15/2020"
 output:
-  ioslides_presentation: default
+  beamer_presentation: default
   slidy_presentation: default
   powerpoint_presentation: default
+  ioslides_presentation: default
+subtitle: Considerations for Time-to-Event Studies
 ---
 
 ```{r setup, include=FALSE}
@@ -15,14 +16,13 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Overview
 
-* Introduction to Time to Event Data
-* Introduction to classical Model Evaluation Tools 
+* Time to Event Data
+* Terminology
+* Classical Model Evaluation Tools 
 * Integrated Brier Score
 * Concordance-Index
 * Discussion 
-* R- Implementation
-* Advancements & Novel Considerations
-* Recommendation
+* Further Considerations
 
 ## Time-to Event Studies 
 
@@ -38,10 +38,7 @@ knitr::opts_chunk$set(echo = FALSE)
 * 
 * Capital H is the cumulative hazard
 * non-parametric hazard models (KM) vs.semi-parametric proportional hazard model
-<<<<<<< HEAD
-=======
 * From hazard to cumulative hazard to survival 
->>>>>>> f8f4db3330071efd4a1c0bbfe82657be0668046c
 * Survival Probability
 
 ## Model Evaluation - Considerations
@@ -53,40 +50,36 @@ knitr::opts_chunk$set(echo = FALSE)
 (2) *What are the components of our model evaluation metric?*
 
 **Discrimination**:
-How well are we able to classify subjects ? Are we able to correctly discriminate between e.g. sick and healthy patients ?
+Are we able to correctly discriminate between e.g. sick and healthy patients ?
 
 **Calibration**:
 How concise is our prediction accuracy ?
-More recently also:
 
 **Clinical Usefulness**: 
-Does it make sense to implement our model in the first place? Will our model create more benefits than harm? 
+Will our model create more benefits than harm? 
 
-## Classical Model Evaluation Tools 
-
-**Classification Tasks**
+## Classical Model Evaluation Tools for Classification Tasks
 
 * Brier Score (probability from true class label)
-* Brier Score for ()
 * Mis-classification Error rate (rate of incorrect classification)
 * ROC (receiver operating characteristics)
 * ACC (rate of correct classifications)
 
-**Regression Tasks**
-
-* Mean Absolute Error (mean absolute error)
-* Mean Squared Error
-* Brier Score 
-* R^2 
-
 ### Brier Score 
 
-* Specific Point in time 
+* Based on loss function 
 
-Brier Score 1 
+MSE for Regression (L2 Loss):
 
-Brier Score 2 
+$BS= \frac{1}{n}\sum^n_{i=1}(y^{(i)})-\hat{y}^{(i)})^2$
 
+Where: the $MSE \in [0;\infty)$
+
+The Brier Score is the MSE for Classification: 
+
+$BS= \frac{1}{n}\sum^n_{i=1}(\hat{\pi}(x^{(i)})-y^{(i)})^2$
+
+The general version of the brier score looks at a specific point in time
 
 ### Confusion Matrix
 
@@ -106,7 +99,10 @@ $TNR = \frac{TN}{TN+FP}$
 
 ## Brier Score - Methods
 
+
 ## ROC/AUC/Concordance Statistics - Methods 
+
+
 
 ## Why cant we use traditional model evaluation tools for time to event studies?
 
@@ -125,7 +121,6 @@ Early approaches:
 - Further modification leads to c-index
 - concordance pairs divided
 - concordance == x1>x2-> y1>y2
-- 
 - Harell's C
 
 ## c-index 
@@ -215,7 +210,7 @@ $$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(
 * N = Number of observations 
 * S_i is the predicted survival function 
 
-## If we take
+## Prediction Error Curve Based on 
 
 ```{r, include =F}
 set.seed(130971)
@@ -223,38 +218,51 @@ library(prodlim)
 library(survival)
 library(pec)
 ```
- 
+
 ```{r}
 set.seed(18713)
 dat=SimSurv(100)
 pmodel=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE)
 perror=pec(list(Cox=pmodel),Hist(time,status)~1,data=dat)
-## cumulative prediction error
-# crps(perror,times=1) # between min time and 1
-## same thing:
-y<- ibs(perror,times=1) # between min time and 1 crps(perror,times=1,start=0) # between 0 and 1 crps(perror,times=seq(0,1,.2),start=0) # between 0 and seq(0,1,.2)
+# y<- ibs(perror,times=1)
+crps(perror,times=seq(0,1,.25),start=0)
+```
+## Prediction Error Curve 
+
+```{r}
 plot(perror)
+```
+
+
+## Calibration Plot
+
+```{r}
 calPlot(pmodel)
 ```
 
-```{r}
-dat <- SimSurv(1000)
+```{r, include=F}
 
+dat <- SimSurv(1000)
 Models <- list("Cox.X1"=coxph(Surv(time,status)~X1,data=dat,x=TRUE,y=TRUE),
                "Cox.X2"=coxph(Surv(time,status)~X2,data=dat,x=TRUE,y=TRUE),
                "Cox.X1.X2"=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE))
-
 PredError <- pec(object=Models,
                  formula=Surv(time,status)~X1+X2, data=dat,
                  exact=TRUE, cens.model="marginal", splitMethod="none",
                  B=0,
                  verbose=TRUE)
-
 print(PredError,times=seq(1,15,1))
+```
+
+
+## Summary Prediction Error Curves
+
+```{r}
 summary(PredError)
 ```
 
-## Plotting the whole damn thing
+
+## Plotting prediction error
 
 ```{r}
 plot(PredError,xlim=c(0,20), ylim = c(0,1))
@@ -267,21 +275,11 @@ plot(PredError,xlim=c(0,20), ylim = c(0,1))
 
 ## Literature
 
-Introduction: 
+**Introduction:**
 
 - Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
 
-Brier Score: 
-
-- Graf, E., Schmoor, C., Sauerbrei, W., & Schumacher, M. (1999). Assessment and comparison of prognostic classification schemes for survival data. Statistics in medicine, 18(17‐18), 2529-2545.
-
-## Advanced Literature on C-index:
-
-- Antolini, L., Boracchi, P., & Biganzoli, E. (2005). A time‐dependent discrimination index for survival data. Statistics in medicine, 24(24), 3927-3944.
-
-- Uno, H., Cai, T., Pencina, M. J., D'Agostino, R. B., & Wei, L. J. (2011). On the C‐statistics for evaluating overall adequacy of risk prediction procedures with censored survival data. Statistics in medicine, 30(10), 1105-1117.
-
-## Comparative Study: 
+**Comparative Study:**
 
 - Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
 
