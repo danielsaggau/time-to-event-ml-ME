@@ -16,12 +16,25 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Overview
 
-* Time to Event Studies
-* Classical Model Evaluation Tools 
-* Integrated Brier Score
-* Concordance-Index
-* Discussion 
-* Further Considerations
+* Time to Event Studies: 
+
+*What is a time to event study ?*
+
+* Classical Model Evaluation: 
+
+*Why cant we use them?*
+
+* TTS Model Evaluation: 
+
+*How do we derive these methods (c-index, ibs)?*
+
+* Discussion :
+
+*What are the shortcomings of these methods?*
+
+* Further Considerations: 
+
+*What solutions exist?* 
 
 ## Time-to Event Studies 
 
