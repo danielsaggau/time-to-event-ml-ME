@@ -12,6 +12,15 @@ subtitle: Considerations for Time-to-Event Studies
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library("mlr3learners")
+library("mlr3")
+library("mlr3proba")
+library("survival")
+library("ranger")
+library("mlr3viz")
+library("survAUC")
+library(prodlim)
+library(pec)
 ```
 
 ## Overview
@@ -39,6 +48,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ## Time-to Event Studies 
 
 - Analysis working with (right) censored data
+- Right censored data (event after follow up) vs. left censored data (event was not recorded when it occured intially)
 - Highly relevant for clinicians in the field of medical statistics e.g. looking at when a patient dies or when he gets a disease (clinical/epidemiological studies)
 - In Economics/Finance e.g. to examine when a subject/borrower will default or when a subject will find/lose a job 
 - Operations research to predict the time a machine will break 
@@ -109,21 +119,21 @@ $TNR = \frac{TN}{TN+FP}$
 ## Why cant we use traditional model evaluation tools for time to event studies?
 
 * Working with censored data
-``
-* Right censored data (event after follow up) vs. left censored data (event was not recorded when it occured intially)
-* We need to estimate survival of patients without having data on e.g. death
-* Also, we need to provide measure over time
+* Need to estimate survival of patients without having data on e.g. death
+* Account for time dependent covariates 
+* 
 
 Early approaches:
  - excluding subjects with right censored data and only evaluate on the complete data
 
-## From ROC to C-Statistic to C-index
+## From Harell's C to time dependent C-index
 
-- Advancement of ROC/AUC
-- Further modification leads to c-index
-- concordance pairs divided
-- concordance == $x1>x2-> y1>y2$
-- Harell's C
+- Advancement of AUC
+
+$C^{td}= \frac{\pi_{concordance}}{\pi_{comparable}}$
+
+$C ^{td} = \frac{Pr( z(X_i) > z(X_j) \& T_i < T_j \& E_i = 1}{Pr(Ti<Tj | E_i = 1)}$
+
 
 ## c-index 
 
@@ -135,8 +145,6 @@ Early approaches:
 $C-index = \frac{\Delta_j \times \sum_{i,j}1_{Ti>Tj} \times 1_{\eta_i>\eta_j}} {\Delta_j \times \sum_{i,j}1_{Ti>Tj}}$
 
 * Where 1 are indicator-functions: 
-
-
 
 ```{r}
 library(prodlim)
@@ -193,9 +201,6 @@ $$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(
 
 ```{r, include =F}
 set.seed(123)
-library(prodlim)
-library(survival)
-library(pec)
 dat=SimSurv(1000)
 models <- list("Cox.X1"=coxph(Surv(time,status)~X1,data=dat,x=TRUE,y=TRUE),
                "Cox.X2"=coxph(Surv(time,status)~X2,data=dat,x=TRUE,y=TRUE),
@@ -256,14 +261,6 @@ Further measures via survAUC package:
 ## mlr3Proba Example
 
 ```{r, include =F}
-library("mlr3learners")
-library("mlr3")
-library("mlr3proba")
-library("survival")
-library("ranger")
-library("mlr3viz")
-library("survAUC")
-
 TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
              time = "start", time2 = "stop", type = "interval2")
 task = tsk("rats")

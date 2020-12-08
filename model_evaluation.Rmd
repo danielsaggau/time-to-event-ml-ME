@@ -6,7 +6,7 @@ fontsize: 11pt
 output:
    pdf_document:
     number_sections: true
-citation_package: natbib
+citation_package: --biblatex
 bibliography: [references.bib]
 nocite: '@*'
 ---
