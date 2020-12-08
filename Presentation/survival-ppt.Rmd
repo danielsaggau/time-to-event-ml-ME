@@ -16,8 +16,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Overview
 
-* Time to Event Data
-* Terminology
+* Time to Event Studies
 * Classical Model Evaluation Tools 
 * Integrated Brier Score
 * Concordance-Index
@@ -26,20 +25,18 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Time-to Event Studies 
 
-- Analysis working with right censored data
+- Analysis working with (right) censored data
 - Highly relevant for clinicians in the field of medical statistics e.g. looking at when a patient dies or when he gets a disease (clinical/epidemiological studies)
-- In Economics/finance e.g. to examine when a subject/borrower will default or when a subject will find/lose a job 
+- In Economics/Finance e.g. to examine when a subject/borrower will default or when a subject will find/lose a job 
 - Operations research to predict the time a machine will break 
 
-## Basic structure 
+## Basic Notations & Concepts
 
 * Time T and Survival S
+* From hazard to cumulative hazard to survival 
 * Hazard h(t,x) is the eminent probability of death a specific point in time 
-* 
 * Capital H is the cumulative hazard
 * non-parametric hazard models (KM) vs.semi-parametric proportional hazard model
-* From hazard to cumulative hazard to survival 
-* Survival Probability
 
 ## Model Evaluation - Considerations
 
@@ -49,23 +46,22 @@ knitr::opts_chunk$set(echo = FALSE)
 
 (2) *What are the components of our model evaluation metric?*
 
-**Discrimination**:
-Are we able to correctly discriminate between e.g. sick and healthy patients ?
-
-**Calibration**:
-How concise is our prediction accuracy ?
-
-**Clinical Usefulness**: 
-Will our model create more benefits than harm? 
+**Discrimination**: Are we able to correctly discriminate between e.g. sick and healthy patients ?
+**Calibration**: How concise is our prediction accuracy ?
+**Clinical Usefulness**: Will our model create more benefits than harm? 
 
 ## Classical Model Evaluation Tools for Classification Tasks
 
-* Brier Score (probability from true class label)
-* Mis-classification Error rate (rate of incorrect classification)
-* ROC (receiver operating characteristics)
-* ACC (rate of correct classifications)
+Working with *Label* vs. working with *Probability*
 
-### Brier Score 
+* Brier Score (probability from true class label)
+* 
+* AUC/ROC (receiver operating characteristics)
+* Mis-classification Error rate (rate of incorrect classification)
+* ACC (rate of correct classifications)
+* Concordance Statistics
+
+## Brier Score 
 
 * Based on loss function 
 
@@ -81,7 +77,7 @@ $BS= \frac{1}{n}\sum^n_{i=1}(\hat{\pi}(x^{(i)})-y^{(i)})^2$
 
 The general version of the brier score looks at a specific point in time
 
-### Confusion Matrix
+## Confusion Matrix
 
 **Sensitivity**:
 
@@ -96,13 +92,6 @@ $TPF = \frac{TP}{TP+FN}$
 * Another name for specificity is the true negative rate 
 
 $TNR = \frac{TN}{TN+FP}$
-
-## Brier Score - Methods
-
-
-## ROC/AUC/Concordance Statistics - Methods 
-
-
 
 ## Why cant we use traditional model evaluation tools for time to event studies?
 
@@ -120,15 +109,14 @@ Early approaches:
 - Advancement of ROC/AUC
 - Further modification leads to c-index
 - concordance pairs divided
-- concordance == x1>x2-> y1>y2
+- concordance == $x1>x2-> y1>y2$
 - Harell's C
 
 ## c-index 
 
-* studying pairs of subjects
-* 
+* studying concordance pairs of subjects
 * addressing right censored data via inverse of the probability of censoring weighted estimate (of concordance probability)
-* kendall's tau 
+* kendall's tau as conservative weight 
 * Summary measure (over all time) based on the AUC  
 
 $C-index = \frac{\Delta_j \times \sum_{i,j}1_{Ti>Tj} \times 1_{\eta_i>\eta_j}} {\Delta_j \times \sum_{i,j}1_{Ti>Tj}}$
@@ -137,9 +125,9 @@ $C-index = \frac{\Delta_j \times \sum_{i,j}1_{Ti>Tj} \times 1_{\eta_i>\eta_j}} {
 
 ## mlr3 Proba Applications: 
 
-* van Houwelingen’s Alpha Calibration
+* van Houwelingen’s Alpha Calibration 
 * van Houwelingen’s Beta Calibration
-* Integrated Graf Score
+* Integrated Graf Score (other Name for IBS based on Author Graf)
 * Integrated Log Loss
 * Log Loss
 
@@ -149,7 +137,6 @@ Further measures via survAUC package:
 * Song and Zhou’s AUC/TNR/TPR
 * Chambless and Diao’s AUC
 * Hung and Chiang’s AUC
-
 
 ```{r}
 library(prodlim)
@@ -184,17 +171,9 @@ eval.times=seq(1,15,1))
 * area under the prediction error curve
 * Integral over all points in time to get one summary value henceforth called "integrated" BS
 * able to build a R^2 like measure where we divide MSE of a model with a different MSE of reference model 
-
-For the Individual: 
-
-$$L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})]$$ \newline
-$$+ [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})]$$
-
-
 * Where L is a loss function of the S(the probability that the event of interest has not taken place yet) and time
 * t is the time of the event (death) and t* the time before death
 * G(t) is the P(C>t), so where the censored time is longer than the time (in mlr3proba via survfit == KM Estimate)
-
 * When selecting integrated == FALSE then we looking at specific time 
 
 ## For the population mean:
@@ -210,62 +189,81 @@ $$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(
 * N = Number of observations 
 * S_i is the predicted survival function 
 
-## Prediction Error Curve Based on 
+## Calibration Plot
 
 ```{r, include =F}
-set.seed(130971)
+set.seed(123)
 library(prodlim)
 library(survival)
 library(pec)
-```
-
-```{r}
-set.seed(18713)
-dat=SimSurv(100)
-pmodel=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE)
-perror=pec(list(Cox=pmodel),Hist(time,status)~1,data=dat)
-# y<- ibs(perror,times=1)
-crps(perror,times=seq(0,1,.25),start=0)
-```
-## Prediction Error Curve 
-
-```{r}
-plot(perror)
-```
-
-
-## Calibration Plot
-
-```{r}
-calPlot(pmodel)
-```
-
-```{r, include=F}
-
-dat <- SimSurv(1000)
-Models <- list("Cox.X1"=coxph(Surv(time,status)~X1,data=dat,x=TRUE,y=TRUE),
+dat=SimSurv(1000)
+models <- list("Cox.X1"=coxph(Surv(time,status)~X1,data=dat,x=TRUE,y=TRUE),
                "Cox.X2"=coxph(Surv(time,status)~X2,data=dat,x=TRUE,y=TRUE),
                "Cox.X1.X2"=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE))
-PredError <- pec(object=Models,
-                 formula=Surv(time,status)~X1+X2, data=dat,
-                 exact=TRUE, cens.model="marginal", splitMethod="none",
-                 B=0,
+perror <- pec(object=models,
+                 formula=Surv(time,status)~1, data=dat, # formula for IPCW
+                 exact=TRUE, cens.model="cox", splitMethod="none",  #Method for estimating inverse probability of censoring weigth
+                 B=0,# number boostrap samples 
                  verbose=TRUE)
-print(PredError,times=seq(1,15,1))
+y<- ibs(perror,times=1)
 ```
 
+```{r}
+calPlot(models)
+```
 
 ## Summary Prediction Error Curves
 
 ```{r}
-summary(PredError)
+summary(perror,times=seq(0,20,5))
 ```
-
 
 ## Plotting prediction error
 
 ```{r}
-plot(PredError,xlim=c(0,20), ylim = c(0,1))
+plot(perror,xlim=c(0,25), ylim = c(0,1))
+```
+
+## Cumulative Prediction Error Curve 
+
+```{r}
+crps(perror,times=seq(0,20,5))
+crps(perror)
+```
+
+## c-index plot
+
+```{r}
+cindex <- cindex(models,formula = Surv(time,status) ~ 1, cens.model="marginal", data = dat,eval.times = seq(1,23.4,1))
+plot(cindex)
+```
+
+# mlr3Proba 
+
+```{r}
+library("mlr3learners")
+library("mlr3")
+library("mlr3proba")
+library("survival")
+library("ranger")
+library("mlr3viz")
+library("survAUC")
+
+TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
+             time = "start", time2 = "stop", type = "interval2")
+task = tsk("rats")
+# some integrated learners
+learners = lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
+# print(learners)
+
+# Harrell's C-Index for survival
+measure = msr("surv.cindex")
+print(measure)
+
+set.seed(1)
+bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
+bmr$aggregate(measure)
+autoplot(bmr, measure = measure)
 ```
 
 ## Discussion 
