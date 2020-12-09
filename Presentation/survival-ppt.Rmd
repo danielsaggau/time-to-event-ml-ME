@@ -3,10 +3,9 @@ title: "Model Evaluation"
 author: "Daniel Saggau"
 date: "11/15/2020"
 output:
-  beamer_presentation: default
-  slidy_presentation: default
-  powerpoint_presentation: default
-  ioslides_presentation: default
+  beamer_presentation:
+    includes:
+      in_header: header_pagenrs.tex
 subtitle: Considerations for Time-to-Event Studies
 ---
 
@@ -78,11 +77,7 @@ library(pec)
 Working with *Label* vs. working with *Probability*
 
 * Brier Score (probability from true class label)
-* 
 * AUC/ROC (receiver operating characteristics)
-* Mis-classification Error rate (rate of incorrect classification)
-* ACC (rate of correct classifications)
-* Concordance Statistics
 
 ## Brier Score 
 
@@ -119,27 +114,40 @@ $TNR = \frac{TN}{TN+FP}$
 ## Why cant we use traditional model evaluation tools for time to event studies?
 
 * Working with censored data
-* Need to estimate survival of patients without having data on e.g. death
 * Account for time dependent covariates 
-* 
 
 Early approaches:
  - excluding subjects with right censored data and only evaluate on the complete data
 
-## From Harell's C to time dependent C-index
 
-- Advancement of AUC
+## From AUC to Harell's C-index to time dependent C-index
+
+* Advancement from AUC 
+* Rank correlation measure but still have to deal with censoring
+
+**How to deal with censoring:**
+* Working with KM estimates for censored data, assigning probability scores for uncertain cases
+* Alternative is only working with concordant pairs
+
+* studying concordance (~consistency) and discordance (~inconsistency) pairs
+
+$\frac{\#Concordant Pairs}{\#Concordant Pairs + \#Discordant Pairs}$
+
+In this approach, only comparable pairs are evaluated
 
 $C^{td}= \frac{\pi_{concordance}}{\pi_{comparable}}$
 
+Henceforth: 
+
 $C ^{td} = \frac{Pr( z(X_i) > z(X_j) \& T_i < T_j \& E_i = 1}{Pr(Ti<Tj | E_i = 1)}$
 
+Another method is u
 
 ## c-index 
 
-* studying concordance pairs of subjects
+
 * addressing right censored data via inverse of the probability of censoring weighted estimate (of concordance probability)
-* kendall's tau as conservative weight 
+* Kendall rank correlation coefficient test as inspiration
 * Summary measure (over all time) based on the AUC  
 
 $C-index = \frac{\Delta_j \times \sum_{i,j}1_{Ti>Tj} \times 1_{\eta_i>\eta_j}} {\Delta_j \times \sum_{i,j}1_{Ti>Tj}}$
@@ -286,6 +294,16 @@ autoplot(bmr, measure = measure)
 
 * Integrated Brier Score accounts for both calibration and discrimination
 * Irrespective, neither model accounts and leaves room for improvement 
+
+
+## Discussion - cont.
+
+note
+
+## Conclusion 
+
+* The IBS 
+
 
 ## Literature and Recommendations 
 
