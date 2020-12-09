@@ -72,7 +72,7 @@ library("pec")
 (3) Working with *Label* vs. working with *Probability*
 
 * Brier Score (probability from true class label)
-* AUC/ROC (receiver operating characteristics)
+* AUC (label based error measure via specificity and sensitivity)
 
 ## Brier Score 
 
@@ -174,7 +174,7 @@ $$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(
 
 ## Coding Settup
 
-```{r, }
+```{r}
 set.seed(123)
 dat=SimSurv(10000)
 models <-  list("Cox.X1"=coxph(Surv(time,status)~X1,
@@ -183,7 +183,11 @@ models <-  list("Cox.X1"=coxph(Surv(time,status)~X1,
                       data=dat,x=TRUE,y=TRUE),
                "Cox.X1.X2"=coxph(Surv(time,status)~X1+X2,
                       data=dat,x=TRUE,y=TRUE))
-# prediction error based on brier score
+```
+
+## Defining the prediction error based on the brier score
+
+```{r}
 perror <- pec(object=models,
                  formula=Surv(time,status)~1,  # KM covariate specification; For Cox we use e.g.~ X1 + X2.
               data=dat, 
@@ -199,16 +203,16 @@ perror <- pec(object=models,
 calPlot(models)
 ```
 
-## Summary Prediction Error Curves
+## Summary Prediction Error Curve
 
 ```{r}
-summary(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75)))
+summary(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75,1)))
 ```
 
 ## Plotting prediction error
 
 ```{r}
-plot(perror,xlim=c(0,25), ylim = c(0,0.5))
+plot(perror,xlim=c(0,25), ylim = c(0,0.8))
 ```
 
 ## Cumulative Prediction Error 
@@ -216,7 +220,7 @@ plot(perror,xlim=c(0,25), ylim = c(0,0.5))
 ```{r, out.width=1}
 #crps(object, models, what, times, start)
 crps(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
-ibs(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
+# ibs(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
 ```
 
 ## cindex Implementation 
@@ -249,20 +253,14 @@ plot(cindex,xlim=c(0,25), ylim =c(0.4,1))
 Methods based on the loss function:
 
 * Integrated Graf Score (other Name for IBS based on Author Graf)
-* Integrated Log Loss
-* Log Loss
+* Integrated Log Loss (surpress scale of variation)
+* Log Loss  (censored data ignored)
 
 Further measures via survAUC package:
 
-* Uno's AUC/TPR/TNR
-* Song and Zhou’s AUC/TNR/TPR
-* Chambless and Diao’s AUC
-* Hung and Chiang’s AUC
+* Uno's AUC 
+* Song and Zhou’s AUC
 
-Others: 
-
-* van Houwelingen’s Alpha Calibration 
-* van Houwelingen’s Beta Calibration
 
 ## mlr3Proba Example
 
@@ -271,10 +269,7 @@ TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
              time = "start", time2 = "stop", type = "interval2")
 task = tsk("rats")
 learners = lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
-measure = msr("surv.graf")
-print(measure)
-
-set.seed(1)
+measure = msr("surv.graf") # for c-index you can use surv.cindex
 bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
 bmr$aggregate(measure)
 ```
