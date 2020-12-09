@@ -81,7 +81,7 @@ Other loss measures are the log loss or the integrated log loss.
 
 MSE for Regression (L2 Loss):
 
-$BS= \frac{1}{n}\sum^n_{i=1}(y^{(i)})-\hat{y}^{(i)})^2$
+$MSE= \frac{1}{n}\sum^n_{i=1}(y^{(i)})-\hat{y}^{(i)})^2$
 
 Where: the $MSE \in [0;\infty)$
 
@@ -90,6 +90,7 @@ The Brier Score is the MSE for Classification:
 $BS= \frac{1}{n}\sum^n_{i=1}(\hat{\pi}(x^{(i)})-y^{(i)})^2$
 
 The general version of the brier score looks at a specific point in time
+We can plot this brier score via prediction error curves (pec)
 
 ## Confusion Matrix
 
@@ -175,22 +176,22 @@ $$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(
 
 ```{r, }
 set.seed(123)
-dat=SimSurv(1000)
+dat=SimSurv(10000)
 models <-  list("Cox.X1"=coxph(Surv(time,status)~X1,
                       data=dat, x=TRUE,y=TRUE),
                "Cox.X2"=coxph(Surv(time,status)~X2,
                       data=dat,x=TRUE,y=TRUE),
                "Cox.X1.X2"=coxph(Surv(time,status)~X1+X2,
                       data=dat,x=TRUE,y=TRUE))
+# prediction error based on brier score
 perror <- pec(object=models,
-                 formula=Surv(time,status)~1, 
-              data=dat, # formula for IPCW
-                 exact=TRUE, cens.model="marginal",
-              splitMethod="none",
+                 formula=Surv(time,status)~1,  # KM covariate specification; For Cox we use e.g.~ X1 + X2.
+              data=dat, 
+                 exact=TRUE, cens.model="marginal", # Estimator for IPWC ; For Cox we would use  cens.model="cox"
+              splitMethod="none", 
                  B=0,# number boostrap samples 
                  verbose=TRUE)
 ```
-
 
 ## Calibration Plot
 
@@ -201,29 +202,47 @@ calPlot(models)
 ## Summary Prediction Error Curves
 
 ```{r}
-summary(perror,times=seq(0,20,5))
+summary(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75)))
 ```
 
 ## Plotting prediction error
 
 ```{r}
-plot(perror,xlim=c(0,25), ylim = c(0,1))
+plot(perror,xlim=c(0,25), ylim = c(0,0.5))
 ```
 
 ## Cumulative Prediction Error 
 
 ```{r, out.width=1}
-#crps(perror,times=seq(0,25,5))
-ibs(perror,times=seq(0,23.4,5))
+#crps(object, models, what, times, start)
+crps(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
+ibs(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
+```
+
+## cindex Implementation 
+
+### Components of the c-index function
+cindex(*object, formula, cens.model,data, eval.times, cause, data, splitMethod, B,M...*)
+
+* **formula** is our survival formula (Surv(time,status)~x1+x2 for cens.model="cox" or Surv(time,status)~1 for cens.model ="marginal")
+* **cens.model** is our method for estimating the inverse probability of censoring weights (e.g. cox, marginal, nonpar)
+* **splitMethod** is the internal validation design,  B the number of boostrap samples & M the size of the boostrap sample
+* **cause** used for competing risks (default is the first state of the response)
+
+
+
+```{r, fig.width= 5, fig.height=4}
+cindex = cindex(models, formula = Surv(time,status) ~ 1,
+     cens.model="marginal", data = dat,
+      eval.times= quantile(dat$time[dat$status==1], c(.25, .5, .75)))
 ```
 
 ## c-index plot
 
 ```{r}
-plot(cindex(models, formula = Surv(time,status) ~ 1,
-                      cens.model="marginal", data = dat,
-                      eval.times = seq(1,23.4,1)))
+plot(cindex,xlim=c(0,25), ylim =c(0.4,1))
 ```
+
 
 ## mlr3Proba 
 
@@ -275,15 +294,17 @@ autoplot(bmr, measure = measure)
 
 ## Novel Research
 
-* Decision Curve Analysis
-* Net Reclassification Improvement
+* Decision Curve Analysis (clinical consequences): plotting different exchange rates with the net benefit equation 
+* Net Reclassification Improvement (clinical consequences)
+* Other estimators like SVM estimators for the evaluations tools for the censored data
+* IPA 
+* Competing Risks
 
 ## Conclusion 
 
 * There are various different modifications for model evaluation, neither being unconditionally superior 
 * The Brier Score and the AUC are pivotal for many of these methods
 * While there has been a lot of research on this topic, the debate is on going
-
 
 ## Literature and Recommendations 
 
