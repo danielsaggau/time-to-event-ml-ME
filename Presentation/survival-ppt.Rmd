@@ -1,12 +1,12 @@
 ---
 title: "Model Evaluation"
+subtitle: "Considerations for Time-to-Event Studies"
 author: "Daniel Saggau"
-date: "11/15/2020"
+date: "11/12/2020"
 output:
   beamer_presentation:
-    includes:
-      in_header: header_pagenrs.tex
-subtitle: Considerations for Time-to-Event Studies
+    theme: "Madrid"
+    colortheme: "spruce"
 ---
 
 ```{r setup, include=FALSE}
@@ -47,7 +47,7 @@ library(pec)
 ## Time-to Event Studies 
 
 - Analysis working with (right) censored data
-- Right censored data (event after follow up) vs. left censored data (event was not recorded when it occured intially)
+- Right censored data (event after follow up) vs. left censored data (event was not recorded when it occurred initially)
 - Highly relevant for clinicians in the field of medical statistics e.g. looking at when a patient dies or when he gets a disease (clinical/epidemiological studies)
 - In Economics/Finance e.g. to examine when a subject/borrower will default or when a subject will find/lose a job 
 - Operations research to predict the time a machine will break 
@@ -122,14 +122,14 @@ Early approaches:
 
 ## From AUC to Harell's C-index to time dependent C-index
 
+* 
 * Advancement from AUC 
 * Rank correlation measure but still have to deal with censoring
-
-**How to deal with censoring:**
-* Working with KM estimates for censored data, assigning probability scores for uncertain cases
-* Alternative is only working with concordant pairs
-
 * studying concordance (~consistency) and discordance (~inconsistency) pairs
+
+The AUC is defined as: 
+
+While C is defined as: 
 
 $\frac{\#Concordant Pairs}{\#Concordant Pairs + \#Discordant Pairs}$
 
@@ -145,7 +145,7 @@ Another method is u
 
 ## c-index 
 
-
+**How to deal with censoring:**
 * addressing right censored data via inverse of the probability of censoring weighted estimate (of concordance probability)
 * Kendall rank correlation coefficient test as inspiration
 * Summary measure (over all time) based on the AUC  
@@ -289,20 +289,16 @@ bmr$aggregate(measure)
 autoplot(bmr, measure = measure)
 ```
 
-
 ## Discussion 
 
 * Integrated Brier Score accounts for both calibration and discrimination
 * Irrespective, neither model accounts and leaves room for improvement 
 
-
-## Discussion - cont.
-
-note
-
 ## Conclusion 
 
-* The IBS 
+* There are various different modifications for model evaluation, neither being unconditionally superior 
+* The Brier Score and the AUC are pivotal for many of these methods
+* While there has been a lot of research on this topic, the debate is on going
 
 
 ## Literature and Recommendations 
