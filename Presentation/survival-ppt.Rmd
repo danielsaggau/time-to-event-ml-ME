@@ -60,6 +60,16 @@ library("pec")
 * Capital H is the cumulative hazard
 * non-parametric hazard models (KM) vs.semi-parametric proportional hazard model
 
+KM model:
+
+$h(t)= \frac{d}{dt}[log S(t)]$\newline
+$H(t)= -log(S(t))$\newline
+$S(t)= exp(-H(t))$\newline
+Cox model:
+
+$h(t|x\beta)=h_0(t)exp(\beta^Tx)$
+
+
 ## Classical Model Evaluation Tools for Classification Tasks
 
 (1) **Diagnostic vs. Prognostic Study**
@@ -69,7 +79,7 @@ library("pec")
 * Calibration: How concise is our prediction accuracy ?
 * Clinical Usefulness: Will our model create more benefits than harm? 
 
-(3) Working with *Label* vs. working with *Probability*
+(3) **Label vs. Probability**
 
 * Brier Score (probability from true class label)
 * AUC (label based error measure via specificity and sensitivity)
@@ -116,40 +126,43 @@ Early approaches:
 
 ## From AUC to Harell's C-index to time dependent C-index
 
-* Advancement from AUC 
 * Rank correlation measure but still have to deal with censoring
 * studying concordance (~consistency) and discordance (~inconsistency) pairs
-* Core difference is that
+
+AUC:*"...is individual A likely to have a stroke within the next 5 years?"*
+C:*"...is individual A or individual B more likely to have a stroke?”*
 
 Intuitively speaking the difference between AUC and c-index is as follows: 
 
-$AUC = \mathrm{Prob(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t\: and \: j \: has\: event\: after \: t})$
-$C = \mathrm{Prob(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t)}$
+$$\mathrm{AUC = Prob(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t\: and \: j \: has\: event\: after \: t})$$
+$$\mathrm{C = Prob(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t)}$$
+
+
+
+## c-index 
+
+* addressing right censored data via inverse of the probability of censoring weighted estimate (of concordance probability)
+* Kendall rank correlation coefficient test as inspiration
 
 Further, we could relabel those terms for the C as: 
 
 $\frac{\#Concordant Pairs}{\#Concordant Pairs + \#Discordant Pairs}$
 
+* Summary measure (over all time) based on the AUC  
+
+$C = \frac{\Delta_j \times \sum_{i,j}1_{Ti>Tj} \times 1_{\eta_i>\eta_j}} {\Delta_j \times \sum_{i,j}1_{Ti>Tj}}$
+
 Mathematically, we can define e.g. the C for time dependent covariates as: 
 
 $C ^{td} = \frac{Prob( z(X_i) > z(X_j) \& T_i < T_j \& D_i = 1}{Prob(Ti<Tj | D_i = 1)}$
 
-## c-index 
-
-**How to deal with censoring:**
-* addressing right censored data via inverse of the probability of censoring weighted estimate (of concordance probability)
-* Kendall rank correlation coefficient test as inspiration
-* Summary measure (over all time) based on the AUC  
-
-$C-index = \frac{\Delta_j \times \sum_{i,j}1_{Ti>Tj} \times 1_{\eta_i>\eta_j}} {\Delta_j \times \sum_{i,j}1_{Ti>Tj}}$
-
 
 ## IBS
 
-* called cumulative predictive error curves == continuous ranked probability score (crps)
-* area under the prediction error curve
+* Called cumulative predictive error curves == continuous ranked probability score (crps)
+* Area under the prediction error curve
 * Integral over all points in time to get one summary value henceforth called "integrated" BS
-* able to build a R^2 like measure where we divide MSE of a model with a different MSE of reference model 
+* Able to build a R^2 like measure where we divide MSE of a model with a different MSE of reference model 
 * Where L is a loss function of the S(the probability that the event of interest has not taken place yet) and time
 * t is the time of the event (death) and t* the time before death
 * G(t) is the P(C>t), so where the censored time is longer than the time (in mlr3proba via survfit == KM Estimate)
@@ -157,7 +170,7 @@ $C-index = \frac{\Delta_j \times \sum_{i,j}1_{Ti>Tj} \times 1_{\eta_i>\eta_j}} {
 
 ## Mean population
 
-**Mean Population:without Integration**
+**Mean Population: Without Integration**
 
 $$
 L(S,t|t^*) = \frac{1}{N}\displaystyle\sum^N_{i=1}L(S_i,t_i|t^*) \tag{9}
@@ -184,6 +197,7 @@ models <-  list("Cox.X1"=coxph(Surv(time,status)~X1,
 ```
 
 ## Defining the prediction error based on the brier score
+
 \footnotesize
 ```{r}
 perror <- pec(object=models,
@@ -210,12 +224,12 @@ summary(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75,1)))
 ## Plotting prediction error
 
 ```{r}
-plot(perror,xlim=c(0,25), ylim = c(0,0.8))
+plot(perror)
 ```
 
 ## Cumulative Prediction Error 
-\footnotesize
-```{r, out.width=1}
+\tiny
+```{r, out.width="200px"}
 #crps(object, models, what, times, start)
 crps(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
 # ibs(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
@@ -224,24 +238,24 @@ crps(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
 ## cindex Implementation 
 
 ### Components of the c-index function
-cindex(*object, formula, cens.model,data, eval.times, cause, data, splitMethod, B,M...*)
 
-* **formula** is our survival formula (Surv(time,status)~x1+x2 for cens.model="cox" or Surv(time,status)~1 for cens.model ="marginal")
-* **cens.model** is our method for estimating the inverse probability of censoring weights (e.g. cox, marginal, nonpar)
-* **splitMethod** is the internal validation design,  B the number of boostrap samples & M the size of the boostrap sample
-* **cause** used for competing risks (default is the first state of the response)
-
-\tiny
+\footnotesize
 ```{r}
 cindex = cindex(models, formula = Surv(time,status) ~ 1,
      cens.model="marginal", data = dat,
       eval.times= quantile(dat$time[dat$status==1], c(.25, .5, .75,1)))
 ```
 
+* **formula** is our survival formula (Surv(time,status)~x1+x2 for cens.model="cox" or Surv(time,status)~1 for cens.model ="marginal")
+* **cens.model** is our method for estimating the inverse probability of censoring weights (e.g. cox, marginal, nonpar)
+* **splitMethod** is the internal validation design,  B the number of boostrap samples & M the size of the boostrap sample
+*  Extensions: **cause** used for competing risks (default is the first state of the response)
+
+
 ## c-index plot
 
-```{r, fig.width= 6, fig.height=4}
-plot(cindex,xlim=c(0,24), ylim =c(0.55,1))
+```{r, out.width = "300px", out.height= "210px"}
+plot(cindex)
 ```
 
 
@@ -307,6 +321,10 @@ Introduction:
 Comparative Study:
 
 * Kattan, M. W., & Gerds, T. A. (2018). The index of prediction accuracy: an intuitive measure useful for evaluating risk prediction models. Diagnostic and prognostic research, 2(1), 7.
+
+Modifications: 
+
+* Khosla, A., Cao, Y., Lin, C. C. Y., Chiu, H. K., Hu, J., & Lee, H. (2010, July). An integrated machine learning approach to stroke prediction. In Proceedings of the 16th ACM SIGKDD international conference on Knowledge discovery and data mining (pp. 183-192).
 
 ## Use Cases:
 
