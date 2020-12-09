@@ -119,22 +119,20 @@ Early approaches:
 * Advancement from AUC 
 * Rank correlation measure but still have to deal with censoring
 * studying concordance (~consistency) and discordance (~inconsistency) pairs
+* Core difference is that
 
 Intuitively speaking the difference between AUC and c-index is as follows: 
 
-$AUC = $
-$C = $
-While C is defined as: 
+$AUC = \mathrm{Prob(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t\: and \: j \: has\: event\: after \: t})$
+$C = \mathrm{Prob(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t)}$
+
+Further, we could relabel those terms for the C as: 
 
 $\frac{\#Concordant Pairs}{\#Concordant Pairs + \#Discordant Pairs}$
 
-In this approach, only comparable pairs are evaluated
+Mathematically, we can define e.g. the C for time dependent covariates as: 
 
-$C^{td}= \frac{\pi_{concordance}}{\pi_{comparable}}$
-
-Henceforth: 
-
-$C ^{td} = \frac{Pr( z(X_i) > z(X_j) \& T_i < T_j \& E_i = 1}{Pr(Ti<Tj | E_i = 1)}$
+$C ^{td} = \frac{Prob( z(X_i) > z(X_j) \& T_i < T_j \& D_i = 1}{Prob(Ti<Tj | D_i = 1)}$
 
 ## c-index 
 
@@ -173,7 +171,7 @@ $$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(
 * S_i is the predicted survival function 
 
 ## Coding Settup
-
+\footnotesize
 ```{r}
 set.seed(123)
 dat=SimSurv(10000)
@@ -186,12 +184,12 @@ models <-  list("Cox.X1"=coxph(Surv(time,status)~X1,
 ```
 
 ## Defining the prediction error based on the brier score
-
+\footnotesize
 ```{r}
 perror <- pec(object=models,
-                 formula=Surv(time,status)~1,  # KM covariate specification; For Cox we use e.g.~ X1 + X2.
+                 formula=Surv(time,status)~1,  
               data=dat, 
-                 exact=TRUE, cens.model="marginal", # Estimator for IPWC ; For Cox we would use  cens.model="cox"
+                 exact=TRUE, cens.model="marginal",
               splitMethod="none", 
                  B=0,# number boostrap samples 
                  verbose=TRUE)
@@ -204,7 +202,7 @@ calPlot(models)
 ```
 
 ## Summary Prediction Error Curve
-
+\tiny
 ```{r}
 summary(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75,1)))
 ```
@@ -216,7 +214,7 @@ plot(perror,xlim=c(0,25), ylim = c(0,0.8))
 ```
 
 ## Cumulative Prediction Error 
-
+\footnotesize
 ```{r, out.width=1}
 #crps(object, models, what, times, start)
 crps(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
@@ -233,18 +231,17 @@ cindex(*object, formula, cens.model,data, eval.times, cause, data, splitMethod, 
 * **splitMethod** is the internal validation design,  B the number of boostrap samples & M the size of the boostrap sample
 * **cause** used for competing risks (default is the first state of the response)
 
-
-
-```{r, fig.width= 5, fig.height=4}
+\tiny
+```{r}
 cindex = cindex(models, formula = Surv(time,status) ~ 1,
      cens.model="marginal", data = dat,
-      eval.times= quantile(dat$time[dat$status==1], c(.25, .5, .75)))
+      eval.times= quantile(dat$time[dat$status==1], c(.25, .5, .75,1)))
 ```
 
 ## c-index plot
 
-```{r}
-plot(cindex,xlim=c(0,25), ylim =c(0.4,1))
+```{r, fig.width= 6, fig.height=4}
+plot(cindex,xlim=c(0,24), ylim =c(0.55,1))
 ```
 
 
