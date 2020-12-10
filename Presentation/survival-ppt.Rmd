@@ -11,15 +11,6 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = T)
-library("mlr3")
-library("mlr3learners")
-library("mlr3proba")
-library("mlr3viz")
-library("survival")
-library("ranger")
-library("survAUC")
-library("prodlim") 
-library("pec")
 ```
 
 ## Overview
@@ -32,11 +23,7 @@ library("pec")
 
 4) Discussion
 
-* What measure is most useful for machine learning in TTS? 
-
 5) Further Considerations
-
-* What other methods are coming? 
 
 ## Time-to Event Studies 
 
@@ -48,18 +35,17 @@ library("pec")
 
 ## Basic Notations & Concepts
 
-* Time T and Survival S
-* From hazard to cumulative hazard to survival 
-* Hazard h(t,x) is the eminent probability of death a specific point in time 
+* Survival time T and Survival function S
+* Hazard h(t,x) is the immediate probability of death a specific point in time 
 * Capital H is the cumulative hazard
-* non-parametric hazard models (KM) vs.semi-parametric proportional hazard model
 
-KM model:
+non-parametric hazard models (Kaplan Meier Estimator):
 
 $h(t)= \frac{d}{dt}[log S(t)]$\newline
 $H(t)= -log(S(t))$\newline
 $S(t)= exp(-H(t))$\newline
-Cox model:
+
+Semi-parametric proportional hazard model (Cox Estimator):
 
 $h(t|x\beta)=h_0(t)exp(\beta^Tx)$
 
@@ -80,24 +66,23 @@ $h(t|x\beta)=h_0(t)exp(\beta^Tx)$
 
 ## Brier Score 
 
-The score is based on loss function.
+The score is based on loss function at a certain point in time.
 Other loss measures are the log loss or the integrated log loss.
-The general version of the brier score looks at a specific point in time.
 We can plot this brier score via prediction error curves (pec).
 
 ### Derivation 
 
 MSE for Regression (L2 Loss):
 
-$$MSE= \frac{1}{n}\sum^n_{i=1}(y^{(i)})-\hat{y}^{(i)})^2$$
+$$\mathrm{MSE}=\frac{1}{n}\sum^n_{i=1}(y^{(i)})-\hat{y}^{(i)})^2$$
 
 Where: the $MSE \in [0;\infty)$
 
 The Brier Score is the MSE for Classification: 
 
-$$BS= \frac{1}{n}\sum^n_{i=1}(\hat{\pi}(x^{(i)})-y^{(i)})^2$$
+$$\mathrm{BS}= \frac{1}{n}\sum^n_{i=1}(\hat{\pi}(x^{(i)})-y^{(i)})^2$$
 
-## Confusion Matrix
+## Talking about the Curve
 
 ### Components of the ROC
 
@@ -105,85 +90,103 @@ $$BS= \frac{1}{n}\sum^n_{i=1}(\hat{\pi}(x^{(i)})-y^{(i)})^2$$
 
 * deals with values above the threshold among the subject group which do endure an event 
 
-$$TPF = \frac{TP}{TP+FN}$$
+$$\mathrm{TPF = \frac{TP}{TP+FN}}$$
 
 **Specificity** or: true negative rate 
 
 * deals with false negatives, hence patients with a disease we classify as not having any diseases
 
-$$TNR = \frac{TN}{TN+FP}$$
+$$\mathrm{TNR = \frac{TN}{TN+FP}}$$
 
 ## Why cant we use traditional model evaluation tools for time to event studies?
 
 * Working with censored data
 * Account for time dependent covariates 
+* working with hazards and survival function
 
 Early approaches:
- - excluding subjects with right censored data and only evaluate on the complete data
 
-## From AUC to Harell's C-index to time dependent C-index
+- excluding subjects with right censored data and only evaluate on the complete data
+- **Problem:** Losing a lot of data and potentially inducing bias
 
-* Rank correlation measure but still have to deal with censoring
-* studying concordance (~consistency) and discordance (~inconsistency) pairs
+Solution:
 
-AUC:*"...is individual A likely to have a stroke within the next 5 years?"*
-C:*"...is individual A or individual B more likely to have a stroke?”*
+* inverse of the probability of censoring weighted estimate (IPCW)
+* cindex: IPCW + transform AUC by accepting continuous input and creating rank correlation measure
+* IBS: IPCW + cumulative prediction error over time
+
+## From AUC to Harell's C-index
 
 ### Differentiation AUC and C
 
-Intuitively speaking the difference between AUC and c-index is as follows: 
+One can differentiate AUC and c-index as follows: 
 
 $$\mathrm{AUC = Pr(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t\: and \: j \: has\: event\: after \: t})$$
 $$\mathrm{C = Pr(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t)}$$
 
+* AUC deals with questions like : *"...is individual A likely to have a stroke within the next 5 years?"*
+* concordance index deals with questions like :*"...is individual A or individual B more likely to have a stroke?”*
 
 
-## c-index 
+## concordance-index 
 
-* addressing right censored data via inverse of the probability of censoring weighted estimate (of concordance probability)
-* Kendall rank correlation coefficient test as inspiration
+* addressing right censored data via IPCW
+* Rank correlation measure 
+* studying concordance (~consistency) and discordance (~inconsistency) pairs
+* Kendall rank correlation coefficient test as inspiration (conservative measure)
+* Frequently used concordance assumption: right censored data
+* Ties are considered false predictions 
 
 ### Definitions of c-index
 
 Further, we could relabel those terms for the C as: 
 
-$$\mathrm{\frac{\#Concordant\: Pairs}{\#Concordant\: Pairs + \#Discordant\: Pairs}}$$
+$$\mathrm{\frac{Concordant\: Pairs}{Concordant\: Pairs + Discordant\: Pairs}}$$
 
 Mathematically, we can define e.g. the C for time dependent covariates as: 
 
-$$C ^{td} = \frac{\mathrm{Pr}( z(X_i) > z(X_j) \& T_i < T_j \& D_i = 1}{\mathrm{Pr}(Ti<Tj | D_i = 1)}$$
+$$C ^{td} = \frac{\mathrm{Pr}(Risk_t(i) > Risk_t(j) \& T_i < T_j \& D_i = 1)}{\mathrm{Pr}(Ti<Tj | D_i = 1)}$$
+
+where: * t is the time of the event (death) and t* the time before death
 
 ## IBS
 
-* Called cumulative predictive error curves == continuous ranked probability score (crps)
+* In e.g. 'pec' the score is called the cumulative predictive error curves
 * Area under the prediction error curve
-* Where L is a loss function of the S(the probability that the event of interest has not taken place yet) and time
+* Working with time dependent survival probabilities
 
 ## Mathematics of the IBS
 
+Specifications in mlr3proba:
+
+MeasureSurvGraf$new(integrated = TRUE, times, method = 2, se = FALSE)
+
+method ==1 : Approximation to integration by dividing sample mean weighted equally
+method ==2 : Approximation to integration via mean weighted by difference between time points (default in 'pec')
+
+
+
 ### Mean population
 
-Where: 
+where: 
 
 * N = Number of observations 
 * S_i is the predicted survival function 
-* t is the time of the event (death) and t* the time before death
+* t is the time of the event (death) 
+* t* the time before death
 
-**(integrated==F)** at specific time point
+**(integrated == T)**: 
 
-
-$$
-L(S,t|t^*) = \frac{1}{N}\displaystyle\sum^N_{i=1}L(S_i,t_i|t^*)
-$$
-
-**(integrated == T)** over time
-
-$$L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*)$$
+$$L(S) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*_j)$$
 
 ## Coding Settup
 \footnotesize
 ```{r}
 set.seed(123)
+library("survival")
+library("survAUC")
+library("prodlim") 
+library("pec")
 dat=SimSurv(10000)
 models <-  list("Cox.X1"=coxph(Surv(time,status)~X1,
                       data=dat, x=TRUE,y=TRUE),
@@ -195,6 +198,8 @@ models <-  list("Cox.X1"=coxph(Surv(time,status)~X1,
 
 ## Defining the prediction error based on the brier score
 
+### IPCW based on KM estimates:
+
 \footnotesize
 ```{r}
 perror <- pec(object=models,
@@ -205,6 +210,20 @@ perror <- pec(object=models,
                  B=0,# number boostrap samples 
                  verbose=TRUE)
 ```
+
+### IPCW based on Cox estimates
+
+\footnotesize
+```{r}
+perror_cox <- pec(object=models,
+                 formula=Surv(time,status)~X1 +X2,  
+              data=dat, 
+                 exact=TRUE, cens.model="cox",
+              splitMethod="none", 
+                 B=0,
+                 verbose=TRUE)
+```
+
 
 ## Calibration Plot
 
@@ -242,18 +261,23 @@ crps(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
 cindex = cindex(models, formula = Surv(time,status) ~ 1,
      cens.model="marginal", data = dat,
       eval.times= quantile(dat$time[dat$status==1], c(.25, .5, .75,1)))
+
+
 ```
 
 * **formula** is our survival formula (Surv(time,status)~x1+x2 for cens.model="cox" or Surv(time,status)~1 for cens.model ="marginal")
 * **cens.model** is our method for estimating the inverse probability of censoring weights (e.g. cox, marginal, nonpar)
-* **splitMethod** is the internal validation design,  B the number of boostrap samples & M the size of the boostrap sample
-*  Extensions: **cause** used for competing risks (default is the first state of the response)
+* **splitMethod** is the internal validation design
+* **B** the number of boostrap samples & **M** the size of the boostrap sample
+* Extensions: **cause** used for competing risks (default is the first state of the response)
 
-
-## c-index plot
-
-```{r, out.width = "300px", out.height= "210px"}
-plot(cindex)
+## c-index summary value
+\tiny
+```{r}
+cindex$response
+cindex$AppCindex
+cindex$time
+cindex$cens.model
 ```
 
 
@@ -268,6 +292,11 @@ Methods based on the loss function:
 ## mlr3Proba Example
 
 ```{r, include =F}
+library("mlr3")
+library("mlr3learners")
+library("mlr3proba")
+library("mlr3viz")
+library("ranger")
 TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
              time = "start", time2 = "stop", type = "interval2")
 task = tsk("rats")
@@ -300,6 +329,7 @@ autoplot(bmr, measure = measure)
 * Other estimators like SVM estimators for the evaluations tools for the censored data
 * IPA 
 * Competing Risks
+* Time dependent ROC/AUC
 
 ## Conclusion 
 
@@ -325,3 +355,4 @@ https://rpubs.com/kaz_yos/survival-auc
 https://datascienceplus.com/time-dependent-roc-for-survival-prediction-models-in-r/
 https://rdrr.io/cran/pec/
 https://adibender.github.io/pammtools/
+https://square.github.io/pysurvival/
