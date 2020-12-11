@@ -16,262 +16,230 @@ knitr::opts_chunk$set(echo = T)
 ## Overview
 
 1) Time to Event Studies
-
 2) Classical Model Evaluation: Brier Score and AUC
-
 3) TTS Model Evaluation: IBS and c-index
-
 4) Discussion
-
-5) Further Considerations
+5) Considerations
 
 ## Time-to Event Studies 
 
-- Analysis working with (right) censored data
-- Right censored data (event after follow up) vs. left censored data (event was not recorded when it occurred initially)
-- Highly relevant for clinicians in the field of medical statistics e.g. looking at when a patient dies or when he gets a disease (clinical/epidemiological studies)
-- In Economics/Finance e.g. to examine when a subject/borrower will default or when a subject will find/lose a job 
-- Operations research to predict the time a machine will break 
+- Diagnostic and Prognostic Study
+- Working with censored data 
+- Highly relevant for clinical/epidemiological studies
+- In Economics e.g. to examine when a subject/borrower will default
+- Survival time T, the probability of death a time point h(t,x), cumulative hazard H, and survival function S
 
-## Basic Notations & Concepts
-
-* Survival time T and Survival function S
-* Hazard h(t,x) is the immediate probability of death a specific point in time 
-* Capital H is the cumulative hazard
-
-non-parametric hazard models (Kaplan Meier Estimator):
+Non-parametric hazard model (Kaplan Meier Estimator):
 
 $h(t)= \frac{d}{dt}[log S(t)]$\newline
-$H(t)= -log(S(t))$\newline
 $S(t)= exp(-H(t))$\newline
-
 Semi-parametric proportional hazard model (Cox Estimator):
 
 $h(t|x\beta)=h_0(t)exp(\beta^Tx)$
 
+## Components of Model Evaluation
 
-## Classical Model Evaluation Tools for Classification Tasks
+(1) **Discrimination vs. Calibration (vs. Clinical Usefulness)** 
 
-(1) **Diagnostic vs. Prognostic Study**
-(2) **What elements do we consider?**
-
-* Discrimination: Are we able to correctly discriminate between e.g. sick and healthy patients ?
+* Discrimination: Are we able to discriminate between e.g. sick and healthy patients ?
 * Calibration: How concise is our prediction accuracy ?
 * Clinical Usefulness: Will our model create more benefits than harm? 
 
-(3) **Label vs. Probability**
+(2) **Label vs. Probability**
 
 * Brier Score (probability from true class label)
 * AUC (label based error measure via specificity and sensitivity)
 
 ## Brier Score 
 
-The score is based on loss function at a certain point in time.
-Other loss measures are the log loss or the integrated log loss.
-We can plot this brier score via prediction error curves (pec).
+* Score is based on loss function at a certain point in time
+* Other loss measures are the log loss or the integrated log loss
+* Can Plot brier score via prediction error curves (pec).
+* MSE: Scores range from 0 to infinity and closer to 0 is better 
+* Brier Score: range from 0 to 1
 
-### Derivation 
+### Formula for the Brier Score
 
 MSE for Regression (L2 Loss):
 
 $$\mathrm{MSE}=\frac{1}{n}\sum^n_{i=1}(y^{(i)})-\hat{y}^{(i)})^2$$
 
-Where: the $MSE \in [0;\infty)$
+
 
 The Brier Score is the MSE for Classification: 
 
 $$\mathrm{BS}= \frac{1}{n}\sum^n_{i=1}(\hat{\pi}(x^{(i)})-y^{(i)})^2$$
 
-## Talking about the Curve
+## AUC - Talking about the Curve
+
+* Plotting TPR and TNR at different thresholds
+* We integrate over all thresholds to get the AUC
+* Scores range from 0 to 1 
+* A higher score is better and a score of 0.5 is basically a random model
 
 ### Components of the ROC
 
-**Sensitivity** or: true positive rate
-
-* deals with values above the threshold among the subject group which do endure an event 
+**Sensitivity** or true positive rate:
 
 $$\mathrm{TPF = \frac{TP}{TP+FN}}$$
 
-**Specificity** or: true negative rate 
-
-* deals with false negatives, hence patients with a disease we classify as not having any diseases
+**Specificity** or true negative rate:
 
 $$\mathrm{TNR = \frac{TN}{TN+FP}}$$
 
-## Why cant we use traditional model evaluation tools for time to event studies?
+## Limitations of traditional ME tools
 
 * Working with censored data
+* Working with hazards and survival function
 * Account for time dependent covariates 
-* working with hazards and survival function
 
 Early approaches:
 
-- excluding subjects with right censored data and only evaluate on the complete data
-- **Problem:** Losing a lot of data and potentially inducing bias
+- Excluding subjects with right censored data and only evaluate on the complete data
+- Problem: Losing a lot of data and potentially inducing bias
 
 Solution:
 
-* inverse of the probability of censoring weighted estimate (IPCW)
-* cindex: IPCW + transform AUC by accepting continuous input and creating rank correlation measure
-* IBS: IPCW + cumulative prediction error over time
+* Inverse of the probability of censoring weighted estimate (IPCW)
 
-## From AUC to Harell's C-index
+## From AUC to c-index
 
-### Differentiation AUC and C
+* AUC: *"is individual A likely to have a stroke within the next 5 years?"*
+* c-index:*"is individual A or individual B more likely to have a stroke?”*
+* Concordance (consistency) & discordance (inconsistency) pairs
+* Kendall rank correlation coefficient test as conservative basis
+* Popular assumption: right censored data
 
-One can differentiate AUC and c-index as follows: 
+### Differentiation AUC and c-index
 
 $$\mathrm{AUC = Pr(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t\: and \: j \: has\: event\: after \: t})$$
 $$\mathrm{C = Pr(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t)}$$
 
-* AUC deals with questions like : *"...is individual A likely to have a stroke within the next 5 years?"*
-* concordance index deals with questions like :*"...is individual A or individual B more likely to have a stroke?”*
+## Example of formula for c-index 
 
-
-## concordance-index 
-
-* addressing right censored data via IPCW
-* Rank correlation measure 
-* studying concordance (~consistency) and discordance (~inconsistency) pairs
-* Kendall rank correlation coefficient test as inspiration (conservative measure)
-* Frequently used concordance assumption: right censored data
-* Ties are considered false predictions 
-
-### Definitions of c-index
-
-Further, we could relabel those terms for the C as: 
+### Formula for the c-index
 
 $$\mathrm{\frac{Concordant\: Pairs}{Concordant\: Pairs + Discordant\: Pairs}}$$
 
-Mathematically, we can define e.g. the C for time dependent covariates as: 
+Mathematically, we can define the c-index for time dependent covariates as: 
 
 $$C ^{td} = \frac{\mathrm{Pr}(Risk_t(i) > Risk_t(j) \& T_i < T_j \& D_i = 1)}{\mathrm{Pr}(Ti<Tj | D_i = 1)}$$
 
-where: * t is the time of the event (death) and t* the time before death
-
-## IBS
+## Integrated Brier Score (IBS)
 
 * In e.g. 'pec' the score is called the cumulative predictive error curves
 * Area under the prediction error curve
 * Working with time dependent survival probabilities
 
-## Mathematics of the IBS
-
-Specifications in mlr3proba:
-
-MeasureSurvGraf$new(integrated = TRUE, times, method = 2, se = FALSE)
-
-method ==1 : Approximation to integration by dividing sample mean weighted equally
-method ==2 : Approximation to integration via mean weighted by difference between time points (default in 'pec')
-
-
-
-### Mean population
-
-where: 
-
-* N = Number of observations 
-* S_i is the predicted survival function 
-* t is the time of the event (death) 
-* t* the time before death
+### Formula for IBS (Population) 
 
 **(integrated == T)**: 
 
 $$L(S) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*_j)$$
 
-## Coding Settup
+* N is the number of observations 
+* $S_i$ is the predicted survival function 
+* t is the time of the event 
+* $t^*$ the time before event
+
+## Implementation: Basic Setup
+
+* Using simulated survival data with 10000 observations 
+* Data entails: eventtime, censtime, time, event, X1, X2, status
+
 \footnotesize
 ```{r}
 set.seed(123)
+library("prodlim")
 library("survival")
-library("survAUC")
-library("prodlim") 
 library("pec")
-dat=SimSurv(10000)
-models <-  list("Cox.X1"=coxph(Surv(time,status)~X1,
-                      data=dat, x=TRUE,y=TRUE),
-               "Cox.X2"=coxph(Surv(time,status)~X2,
-                      data=dat,x=TRUE,y=TRUE),
-               "Cox.X1.X2"=coxph(Surv(time,status)~X1+X2,
-                      data=dat,x=TRUE,y=TRUE))
+dat <- SimSurv(10000)
+models <- list(
+  "Cox.X1" = coxph(Surv(time, status) ~ X1,
+    data = dat, x = TRUE, y = TRUE),
+  "Cox.X2" = coxph(Surv(time, status) ~ X2,
+    data = dat, x = TRUE, y = TRUE),
+  "Cox.X1.X2" = coxph(Surv(time, status) ~ X1 + X2,
+    data = dat, x = TRUE, y = TRUE))
 ```
 
-## Defining the prediction error based on the brier score
+## Implementation: Integrated Brier Score
 
-### IPCW based on KM estimates:
+### IPCW based on Kaplan Meier estimates:
 
 \footnotesize
 ```{r}
-perror <- pec(object=models,
-                 formula=Surv(time,status)~1,  
-              data=dat, 
-                 exact=TRUE, cens.model="marginal",
-              splitMethod="none", 
-                 B=0,# number boostrap samples 
-                 verbose=TRUE)
+perror <- pec(
+  object = models,
+  formula = Surv(time, status) ~ 1, # ,~X1 +X2, for cox
+  data = dat, exact = TRUE, cens.model = "marginal", # .model="cox"
+  splitMethod = "none",
+  B = 0
+)
 ```
 
-### IPCW based on Cox estimates
+* **cens.model** is our ipcw estimator
+* **splitMethod** is the internal validation design
+* **B** is the number bootstrap samples & **M** the bootstrap size
+* Optional: **cause** for competing risks
+* If **exact** is equal to T then we estimate pec at all the unique values of response
 
-\footnotesize
-```{r}
-perror_cox <- pec(object=models,
-                 formula=Surv(time,status)~X1 +X2,  
-              data=dat, 
-                 exact=TRUE, cens.model="cox",
-              splitMethod="none", 
-                 B=0,
-                 verbose=TRUE)
-```
-
-
-## Calibration Plot
+## Implementation: Calibration Plot
 
 ```{r}
 calPlot(models)
 ```
 
-## Summary Prediction Error Curve
+## Implementation: Prediction Error Curve
+
 \tiny
 ```{r}
-summary(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75,1)))
+summary(perror, times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1)))
 ```
+\normalsize
+* A lower score is better here
+* Comparing at quantiles 
+* Frequently people only use the first 3 quantifies
 
-## Plotting prediction error
-
+## Plotting the prediction error curve
+\footnotesize
 ```{r}
 plot(perror)
 ```
 
-## Cumulative Prediction Error 
+## Implementation: Cumulative Prediction Error Score (IBS)
 
-### Components of Cumulative Prediction Error Score (IBS)
 \tiny
 ```{r, out.width="200px"}
-crps(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
+crps(perror, times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1)))
 # ibs(perror,times= quantile(dat$time[dat$status==1], c(.25, .5, .75, 1)))
 ```
+\footnotesize
+* A lower score is better with scores ranging from 0 to 1
+* Looking at different time points thresholds
+* Score can also be derived for the individual or a specific time point in various packages
 
-## cindex Implementation 
+## Implementation: c-index 
 
 ### Components of the c-index function
 
 \footnotesize
 ```{r}
-cindex = cindex(models, formula = Surv(time,status) ~ 1,
-     cens.model="marginal", data = dat,
-      eval.times= quantile(dat$time[dat$status==1], c(.25, .5, .75,1)))
-
-
+cindex <- cindex(models,
+  formula = Surv(time, status) ~ 1,
+  cens.model = "marginal", data = dat,
+  eval.times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1))
+)
 ```
 
-* **formula** is our survival formula (Surv(time,status)~x1+x2 for cens.model="cox" or Surv(time,status)~1 for cens.model ="marginal")
-* **cens.model** is our method for estimating the inverse probability of censoring weights (e.g. cox, marginal, nonpar)
+* **formula** is our survival formula
+* **cens.model** is our method for estimating the IPCW
 * **splitMethod** is the internal validation design
 * **B** the number of boostrap samples & **M** the size of the boostrap sample
-* Extensions: **cause** used for competing risks (default is the first state of the response)
+* Extensions: **cause** used for competing risks
 
-## c-index summary value
+## Implementation: c-index summary value
+
 \tiny
 ```{r}
 cindex$response
@@ -280,36 +248,47 @@ cindex$time
 cindex$cens.model
 ```
 
-
-## mlr3Proba 
-
-Methods based on the loss function:
-
-* Integrated Graf Score (other Name for IBS based on Author Graf)
-* Integrated Log Loss (surpress scale of variation)
-* Log Loss  (censored data ignored)
-
-## mlr3Proba Example
+## Implementation: Measures in mlr3proba
 
 ```{r, include =F}
 library("mlr3")
 library("mlr3learners")
 library("mlr3proba")
 library("mlr3viz")
-library("ranger")
-TaskSurv$new(id = "interval_censored", backend = survival::bladder2[,-c(1, 7)],
-             time = "start", time2 = "stop", type = "interval2")
-task = tsk("rats")
-learners = lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
-measure = msr("surv.graf") # for c-index you can use surv.cindex
-bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
-bmr$aggregate(measure)
+
+TaskSurv$new(id = "interval_censored", backend = survival::bladder2[, -c(1, 7)],
+  time = "start", time2 = "stop", type = "interval2")
+task <- tsk("rats")
+learners <- lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
+measure <- msr("surv.graf") # for c-index you can use surv.cindex
+bmr <- benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 2)))
+# bmr$aggregate(measure)
 ```
+
 \footnotesize
-```{r, fig.width= 3.5, fig.height=2.5}
+```{r}
+library("mlr3")
+library("mlr3learners")
+library("mlr3proba")
+library("mlr3viz")
+
 ##' measure = msr("surv.graf") # for c-index you can use surv.cindex
 ##' bmr = benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 3)))
 ##' bmr$aggregate(measure)
+
+# Modification via: 
+#' MeasureSurvGraf$new(integrated = TRUE, times, method = 2, se = FALSE)
+```
+\normalsize
+* If integrate == T then: times =  vector of time-points over which to integrate the score; otherwise: single time point
+* method ==1: Approx. to integration by dividing sample mean weighted equally 
+* method ==2: Approx. to integration via mean weighted by difference between  time points (default in 'pec')
+
+
+## Implementation: mlr3Proba Benchmark Example
+
+\footnotesize
+```{r, fig.width= 3.5, fig.height=2.5}
 autoplot(bmr, measure = measure)
 ```
 
@@ -317,25 +296,16 @@ autoplot(bmr, measure = measure)
 
 * c-index has gained popularity because of it's interpretability
 * Integrated Brier Score accounts for both calibration and discrimination
-* Irrespective, neither model accounts and leaves room for improvement 
-* IBS allows for differentiation of 'useless' and 'harmful'
-* Estimators can be influenced by data
+* For predictive modelling, you want to account for both components
+* IBS allows for differentiation of 'useless' and 'harmful' models
 * Clinical consequences problematic 
 
-## Novel Research
+## Considerations
 
-* Decision Curve Analysis (clinical consequences): plotting different exchange rates with the net benefit equation 
+* Decision Curve Analysis (clinical consequences)
 * Net Reclassification Improvement (clinical consequences)
-* Other estimators like SVM estimators for the evaluations tools for the censored data
-* IPA 
-* Competing Risks
+* Other estimators like SVM estimators for the censored data
 * Time dependent ROC/AUC
-
-## Conclusion 
-
-* There are various different modifications for model evaluation, neither being superior 
-* The Brier Score and the AUC are pivotal for many of these methods
-* While there has been a lot of research on this topic, the debate is on going
 
 ## Literature and Recommendations 
 
@@ -343,16 +313,19 @@ Introduction:
 
 * Steyerberg, E. W., Vickers, A. J., Cook, N. R., Gerds, T., Gonen, M., Obuchowski, N., ... & Kattan, M. W. (2010). Assessing the performance of prediction models: a framework for some traditional and novel measures. Epidemiology (Cambridge, Mass.), 21(1), 128.
 
-* Blanche, P., Kattan, M. W., & Gerds, T. A. (2019). The c-index is not proper for the evaluation of-year predicted risks. Biostatistics, 20(2), 347-357.
-
 Modifications: 
+
+* Blanche, P., Kattan, M. W., & Gerds, T. A. (2019). The c-index is not proper for the evaluation of-year predicted risks. Biostatistics, 20(2), 347-357.
 
 * Khosla, A., Cao, Y., Lin, C. C. Y., Chiu, H. K., Hu, J., & Lee, H. (2010, July). An integrated machine learning approach to stroke prediction. In Proceedings of the 16th ACM SIGKDD international conference on Knowledge discovery and data mining (pp. 183-192).
 
 ## Use Cases:
 
-https://rpubs.com/kaz_yos/survival-auc
-https://datascienceplus.com/time-dependent-roc-for-survival-prediction-models-in-r/
-https://rdrr.io/cran/pec/
-https://adibender.github.io/pammtools/
-https://square.github.io/pysurvival/
+Decision Curve Analysis: 
+
+https://rdrr.io/github/ddsjoberg/dca/man/stdca.html
+
+Concordance Related Model Evaluation: 
+
+* https://rpubs.com/kaz_yos/survival-auc
+* https://datascienceplus.com/time-dependent-roc-for-survival-prediction-models-in-r/
