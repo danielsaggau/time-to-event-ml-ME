@@ -32,15 +32,15 @@ library("survIDINRI")
 
 # Introduction 
 
-A common challenge of Time-to-Event studies is working with right censored data.
-Right censored data is data where not all patients have an event taking place.
+A common challenge of Time-to-Event studies is working with censored data.
+Censored data means that we don't have information on the event for all subjects in our data. 
 Reasons for that can be manifold, but one example would be that the study ends prior to the event occurring.
-This paper will illustrate some model evaluation metrics and respective modifications for Time-to-Event studies, focusing predominately on popular extensions of the loss function and the receiver operating characteristic curve, specifically focusing on the IBS and the (time dependent) c-index.
+This paper will illustrate some model evaluation metrics and respective modifications for Time-to-Event studies, focusing predominately on popular extensions of the loss function and the area under the curve(AUC), specifically focusing on the IBS and the (time dependent) c-index.
 
-The c-index does enjoy considerably prominence among clinicians due to interpretability and the ability to make insightful conclusions for individual subjects.
+The c-index does enjoy considerable prominence among clinicians due to interpretability and the ability to make insightful conclusions for individual subjects.
 Irrespective, the c-index only considers discrimination, neglecting model calibration.
-We suggests that the integrated brier score is the preferable tool for model evaluation.
-For completeness, there will be a brief outline of novel methods, suggesting considering potential for future research. 
+We suggests that the integrated brier score is the preferable tool for model evaluation with predictive models.
+For completeness, there will be a brief outline of novel methods, suggesting potential for future research. 
 
 The paper is structured as follows:
 Firstly, there is an introduction of the different components of model evaluation.
@@ -57,32 +57,27 @@ In a clinical setting, studies can be separated into diagnostic and prognostic s
 
 Diagnostic studies are concerned with the problem of how to classify a patient at that very point in time.
 For binary classification tasks during diagnostic studies, where we need separate between e.g. patients with and without disease, optimal discrimination is a pivotal concern. 
-Prognostics on the other hand deals with predictive modeling were accuracy becomes an eminent consideration. 
+Prognostics on the other hand deals with predictive modeling were also accuracy becomes an eminent consideration. 
 Diagnostic is of less interest for the field of machine learning.
 
 Further, we can disentangle the different components of model evaluation into various groups.
 Fundamentally, model evaluation focuses on discrimination and calibration.
-A third more recent focus is the issue of clinical usefulness, which will be discussed later.
+A third more recent focus is the issue of clinical usefulness.
+Clinical usefulness is as the name suggests only relevant for clinical research and henceforth of secondary focus here. 
 
 ## Discrimination 
 
 When controlling for discrimination, we are controlling for how well our model is handling subjects with outcomes as compared to subjects without outcomes. 
 Therefore, as the name suggest, we are testing how strong our model discriminates between subjects that incur an event versus subjects that don't. 
 Perfect discrimination would imply that all our subjects with the outcome have higher scores than subjects that do not have an outcome.
-One should note that when using a model that only controls for discrimination, our predictive accuracy could be horrible but as long as this condition holds, inaccurate models could be evaluated falsely as superior.
-Prominent tools to study discrimination are the concordance statistics or the net reclassification index. 
-
-## Discrimination Plot 
-
-Researchers have combined the usage of reclassification tools with discrimination measures.
-
-**insert here**
+When solely using a discrimination centered evaluation tool, our predictive accuracy could be severely impaired, but as long as we discriminate correctly we would still measure a strong performance. 
+The most prominent tools to study discrimination is the concordance statistics. 
 
 ### Concordance-statistics, Harell's C and the c-index
 
-The  Receiver Operating Characteristic Curve (ROC) is an important model evaluation tool for discrimination.
-The ROC is the foundation for the concordance statistics (c-statistics), a statistics suitable for censored data (Antolini et al., 2005).
-The c-index is a further minor modification of the concordance statistics. 
+The  Receiver Operating Characteristic Curve (ROC), the curve in the area under the curve (AUC) score, is an important model evaluation tool for discrimination.
+The ROC is the foundation for the concordance statistics (c-statistics), a modified AUC suitable for censored data (Antolini et al., 2005).
+Prior to discussing the c-index, this section will briefly recap the foundation of the ROC and AUC.
 In a nutshell, the ROC takes into account two factors namely sensitivity and specificity.
 The ROC takes these two factors and plots sensitivity against (1- specificity). 
 The area under the curve or the c-statistic ranges from 0.5 (no discrimination) to the maximum value of 1 (perfect discrimination).
@@ -105,30 +100,26 @@ $$
 
 #### From AUC/ROC to concordance statistics
 
-Due to the fact that we deal need to be able to deal with censored data, we need to modify the ROC.
 The c- index is the generalization of the ROC for survival data (Cook, N., 2007).
-Essentially, the c-statistic is equivalent to the probability that the measure or predicted risk is higher for a case than for a non-case. 
-Further, c-statistic describes how well models rank case and non-case, using a rank correlation measure, focusing on Kendall's tau (Uno et al., 2011).
-A c-statistics above the threshold of 0,8 can be considered good (Zhang et al.,2018).
+Due to the fact that we deal need to be able to deal with censored data, we need to modify the AUC.
+The c-statistic describes how well models rank case and non-case, using a rank correlation measure, based on Kendall's tau (Uno et al., 2011).
+Generally speaking, a c-statistics above the threshold of 0,8 can be considered good (Zhang et al.,2018).
 
 ### Modifications of the AUC/ROC
 
-Alternatively, there are a number of time dependent measures and modification of this method and the AUC/ROC curve, which are  interesting for Time-to-Event studies. 
+Alternatively, there are a number of time dependent measures and modification of this method and the AUC/ROC curve, which are interesting when we have to time dependent covariates which don't have a 1-to-1 follow up.
 
 Heagerty and Zheng (2005) introduce 3 modifications of the AUC, namely the (1) cumulative sensitivity and dynamic specificity (C/D), (2) incident sensitivity and dynamic specificity (I/D) and (3) incident sensitivity and static specificity (I/S).
 
-**cumulative sensitivity and dynamic specificity**: Cumulative sensitivity describes the likelihood of a subject to experience a higher score among those who already experienced the event prior to time t. 
+**Cumulative sensitivity and dynamic specificity**: Cumulative sensitivity describes the likelihood of a subject to experience a higher score among those who already experienced the event prior to time t. 
 Dynamic specificity is the counterpart, looking at the likelihood of subjects to have lower scores among the event free subjects surpassing point t (Kamarudin et al., 2017).
-This method is considered useful when dealing having specific points of time in mind.
-As this is often the case, this method has frequently found application in clinical studies (Kamarudin et al., 2017).
-
-**incident sensitivity and dynamic specificity**: Here sensitivity is the likelihood of a subject to have a greater score among the individuals who have the event taking place at a the time point t. 
+This method is considered useful when dealing having specific points of time in mind (Kamarudin et al., 2017).
+**Incident sensitivity and dynamic specificity**: Here sensitivity is the likelihood of a subject to have a greater score among the individuals who have the event taking place at a the time point t. 
 Respectively, the specificity is the likelihood of a subject to have a lower score among the individuals who dont have the event taking place in time t. 
-This measure is less frequently used and mostly not the focus of clinical studies.(Kamarudin et al., 2017).
-
-**incident sensitivity and static specificity**:
+This measure is less frequently used.(Kamarudin et al., 2017).
+**Incident sensitivity and static specificity**:
 The sensitivity is again the likelihood of a subject to have a greater score among the individuals who have the event taking place at a the time point t while the control is an event free individual for a fixed follow up period.
-As the second and third modification are rarely used, scholarship usually only focuses on the C/D variation.(Kamarudin et al., 2017).
+I/D and I/S are rarely used.(Kamarudin et al., 2017).
 
 #### Mathematical derivation 
 
@@ -144,32 +135,25 @@ $$
 
 ### Modifications 
 
-Antolini et al. (2005) propose a time dependent c-index, where discrimination is summarized over time.
+Harell'c is the most commonly used C-index. 
+Antolini et al. (2005) propose a time dependent c-index for time dependent covariates.
 Their model considered the presence of a population feature rather than a shortcoming of the sample. 
-
 Uno et al.(2011) propose a modified c-statistic which is consistent for population concordance measures.
 
-Further measures via survAUC package:
-
-* Uno's AUC/TPR/TNR
-* Song and Zhou’s AUC/TNR/TPR
-* Chambless and Diao’s AUC
-* Hung and Chiang’s AUC
-
-
-**Song, X., & Zhou, X. H. (2008).** A semiparametric approach for the covariate specific ROC curve with survival outcome. Statistica Sinica, 947-965.
 
 ##  Advantages 
 
 The c-index has gained popularity because of it's interpretability (Kattan and Gerds, 2018).
 Especially for the individual patient in diagnostic studies, this method has gained popularity.
 Further, there are many well established packages in R to work with the AUC/ concordance statistics /c-index due to its popularity. 
-Additionally, performance is not assessed relative to a different model.
 
 ## Disadvantages 
 
 Prognostic studies need to account for the model accuracy which is measured by model calibration.
-The c-statistics is not a probabilistic function but merely a misclassification rate.
+Calibration captures the accuracy of our predictions of our model which is very important for prediction models.
+One ways to measure calibration is for instance the Hosmer-Lemeshow test, the "goodness of fit" test. (Gerds and Schumacher, 2006).
+Kattan and Gerds (2018), argue that model evaluation metrics needs to be able to differentiate between useless and harmful models.
+Harmful models are models that make severely wrong predictions (and some right ones) while useless models always predict some level of prevalence. 
 Henceforth, using a concordance statistic for prognostic studies is not advised.
 
 **Estimators can be influenced by data:**
@@ -178,31 +162,17 @@ Specificity is dependent on the data structure, but as suggested by Cook (2007),
 
 **Impaired Sensitivity:**
 Because c-statistics is based on ranks it is less sensitive than e.g. measures based on probabilities.  
-**Clinical consequences:**
-Kattan and Gerds (2018), argue that model evaluation metrics needs to be able to differentiate between useless and harmful models.
-Harmful models are models that make incorrect predictions while useless models always predict prevalence. 
-The c-index does not account for clinical consequences and the subjective importance of false positives relative to false negatives. 
-This problem holds for both the c-index and the brier score but generally speaking, clinical cost are different than specified in these method.  
-**Calibration:**
-Calibration captures the accuracy of our predictions of our model which is very important for prediction models.
-One ways to measure calibration is for instance the Hosmer-Lemeshow test, the "goodness of fit" test. (Gerds and Schumacher, 2006). 
 
-Notable mentions:
-* Nagelkerke’s R2
-* O’Quigley, Xu, and Stare’s R2
-* Xu and O’Quigley’s R2
+**Clinical consequences:**
+The c-index does not account for clinical consequences and the subjective importance of false positives relative to false negatives. 
+
 
 Another popular method is the the integrated brier score, a score that controls for both discrimination and calibration.
 
 ## Calibration Plot 
 
-We can use calibration plots to visualize the calibration of our model
-
+We can use calibration plots to visualize the calibration of our model.
 The 'pec' packages provides the 'calPlot' function.
-
-Notable packages: 
-'pec':cindex(),calPlot() 
-'survival': concordance() function 
 
 ```{r, include =F}
 set.seed(18713)
@@ -210,16 +180,13 @@ dat=SimSurv(100)
 pmodel=coxph(Surv(time,status)~X1+X2,data=dat,x=TRUE,y=TRUE)
 perror=pec(list(Cox=pmodel),Hist(time,status)~1,data=dat)
 ## cumulative prediction error
-# crps(perror,times=1) # between min time and 1
-## same thing:
-y<- ibs(perror,times=1) # between min time and 1 crps(perror,times=1,start=0) # between 0 and 1 crps(perror,times=seq(0,1,.2),start=0) # between 0 and seq(0,1,.2)
+y<- crps(perror,times=1) 
 plot(perror)
 ```
 
 ```{r}
 calPlot(pmodel)
 ```
-
 
 # Brier Score
 
@@ -228,12 +195,17 @@ With uni-dimensional predictions the brier score is the same as the mean squared
 
 ## Mean Squared Error/ Loss Function 
 
-**insert here** 
+MSE in a Regression setting:
+
+$$\mathrm{MSE}=\frac{1}{n}\sum^n_{i=1}(y^{(i)})-\hat{y}^{(i)})^2$$ 
+
+The Brier Score is the MSE for Classification: 
+
+$$\mathrm{BS}= \frac{1}{n}\sum^n_{i=1}(\hat{\pi}(x^{(i)})-y^{(i)})^2$$ 
 
 Other terminology that you might encounter is the predicted error or mean squared loss function (Schoop et al.,2011; Gerds & Schumacher, 2006).
 The 'pec' package for instance refers to to the score as the predicted error curve. 
 The mlr3proba package refers to the brier score as the 'surv.graf', based on Graf who initially modified the measure. 
-
 ## Explanation of Method 
 
 The mean squared error in a nutshell is the incurred quadratic loss, studying the predicted and the true event status (Schoop et al.,2011).
@@ -245,29 +217,20 @@ To get a comprehensive time dependent model performance, multiple time points ha
 For the individual at time t:
 
 $$
-L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})] \tag{8}
+L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})] \tag{10}
 $$
-
-For the population mean:
-
-$$
-L(S,t|t^*) = \frac{1}{N}\displaystyle\sum^N_{i=1}L(S_i,t_i|t^*) \tag{9}
-$$
-
-## Modifications
 
 Integrated population mean version: 
 
 $$
-L(S,t|t^*) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*) \tag{10}
+L(S) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*) \tag{12}
 $$
 
 ### (Integrated) Log loss survival measure/ (Integrated) cross entropy
 
 **insert here** 
 
-
-```{r}
+```{r, include =F}
 set.seed(130971)
 library(prodlim)
 library(survival)
@@ -293,8 +256,6 @@ print(PredError,times=seq(1,30,1))
 summary(PredError)
 plot(PredError,xlim=c(0,20), ylim = c(0,0.5))
 ```
-
-
 
 ## Advantages 
 **Hollistic and Concise Statistical Underpinnings:**
@@ -345,47 +306,7 @@ Further they suggest that reclassification calibration statistic and NRI both ma
 
 ### Net reclassification and integrated discrimination improvement implementation 
 
-Notable packages: 
-
-'survIDINRI': 
-
-```{r, include =F}
-data(pbc)
-pbc <- within(pbc, {
-    ## transplant (1) and death (2) are considered events, and marked 1
-    event <- as.numeric(status %in% c(1,2))
-
-    ## Create a survival vector
-    Surv <- Surv(time, event)
-})
-
-## Create numeric variable for sex
-pbc$female <- as.numeric(pbc$sex == "f")
-
-## C-statistic for age sex model
-unoC.age.female <- Est.Cval(mydata = pbc[,c("time","event","age","female")],tau = 10 * 365.25)
-unoC.age.female$Dhat
-unoC.age.female.albumin <- Est.Cval(mydata = pbc[,c("time","event","age","female","albumin")], tau = 10 * 365.25)
-unoC.age.female.albumin$Dhat
-uno.C.delta <- Inf.Cval.Delta(mydata = pbc[,c("time","event")],
-                              covs0  = pbc[,c("age","female")],           # age sex model
-                              covs1  = pbc[,c("age","female","albumin")], # age sex albumin model
-                              tau    = 10 * 365.25,                       # Trucation time (max time to consider)
-                              itr = 1000)                                 # Iteration of perturbation-resampling
-uno.C.delta
-
-
-res.IDI.INF <- IDI.INF(indata = pbc[,c("time","event")],
-                       covs0 = pbc[,c("age","female")],           # age sex model
-                       covs1 = pbc[,c("age","female","albumin")], # age sex albumin model
-                       t0 = 10 * 365.25,
-                       npert = 300, npert.rand = NULL, seed1 = NULL, alpha = 0.05)
-
-## M1 IDI; M2 continuous NRI; M3 median improvement
-IDI.INF.OUT(res.IDI.INF)
-
-## M1 red area; M2 distance between black points; M3 distance between gray points
-```
+Notable packages: 'survIDINRI': 
 
 ## Decision Analysis Curve 
 

@@ -47,14 +47,14 @@ $h(t|x\beta)=h_0(t)exp(\beta^Tx)$
 
 (2) **Label vs. Probability**
 
-* Brier Score (probability from true class label)
 * AUC (label based error measure via specificity and sensitivity)
+* Brier Score (probability from true class label)
 
 ## Brier Score 
 
 * Score is based on loss function at a certain point in time
 * Other loss measures are the log loss or the integrated log loss
-* Can Plot brier score via prediction error curves (pec).
+* Can Plot brier score via prediction error curves (pec)
 * MSE: Scores range from 0 to infinity and closer to 0 is better 
 * Brier Score: range from 0 to 1
 
