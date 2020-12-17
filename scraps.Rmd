@@ -1,0 +1,23 @@
+---
+title: "scraps"
+author: "Daniel Saggau"
+date: "12/17/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 
+
+### Modifications of the AUC/ROC
+
+Alternatively, there are a number of time dependent measures and modification of this method and the AUC/ROC curve, which are interesting when we have to time dependent covariates which don't have a 1-to-1 follow up.
+
+Heagerty and Zheng (2005) introduce 3 modifications of the AUC, namely the (1) cumulative sensitivity and dynamic specificity (C/D), (2) incident sensitivity and dynamic specificity (I/D) and (3) incident sensitivity and static specificity (I/S).
+
+**Cumulative sensitivity and dynamic specificity**: Cumulative sensitivity describes the likelihood of a subject to experience a higher score among those who already experienced the event prior to time t. Dynamic specificity  looks at the likelihood of subjects to have lower scores among the event free subjects surpassing point t (Kamarudin et al., 2017).
+This method is considered useful when dealing having specific points of time in mind (Kamarudin et al., 2017).
+Given that C/D is the most frequently used method and the other specifications are rare, only this method is mentioned. 
+For the other specifications, see Kamarudin et al.(2017).
