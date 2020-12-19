@@ -47,7 +47,13 @@ Lastly, the conclusion will summarize core findings of this brief outline.
 # Notations in Time to event Studies
 
 Time-to-event studies (TTE) usually all entail some similar components.
-For every TTE study, we have a hazard function
+Firstly, we have survival time T, the time before an event takes places.
+For every TTE study, we have a hazard function h. 
+Further, we can derive the cumulative hazard H, which will be the basis for our survival function.
+The survival function defines the probability that the event has not happened at time point t.
+Survival is sometimes written as Pr[T > t] which is means we are looking at the probability of the (total) survival time T being bigger or equal to our time point t.
+Frequently, rather than working with the hazards directly, one works with risk scores r().
+
 
 # Components of Model Evaluation 
 
@@ -148,30 +154,27 @@ Another popular method is the the integrated brier score, a score that controls 
 They use a unique definition of concordance, arguing that any event that is not in the data, is bound to take place at a later point than any event that is already in the dataset (right censoring).
 Their model considered the presence of a population feature rather than a shortcoming of the sample.
 
-# Brier Score
+# Brier Score: Foundation
 
-The score brier was initially used for weather forecasting (Graf et al., 1999).
-With uni-dimensional predictions the brier score is the same as the mean squared error. 
-
-## Mean Squared Error/ Loss Function 
-
-MSE in a Regression setting:
+The Brier Score is the MSE for Classification.
+The MSE, the mean squared error, is a accuracy measure in a regression setting.
+Mathematically, we can define the MSE as follows: 
 
 $$\mathrm{MSE}=\frac{1}{n}\sum^n_{i=1}(y^{(i)})-\hat{y}^{(i)})^2$$ 
 
-The Brier Score is the MSE for Classification: 
+Now, we need to make some changes when working with classifications.
+For the brier score, we are using a probability estimates $\hat{\pi}(x^{i})$ rather than estimates of y.
 
 $$\mathrm{BS}= \frac{1}{n}\sum^n_{i=1}(\hat{\pi}(x^{(i)})-y^{(i)})^2$$ 
 
-For the brier score, we are using a probability estimates $\pi(x^{i})$.
 Other terminology that you might encounter is the predicted error or mean squared loss function (Schoop et al.,2011; Gerds & Schumacher, 2006).
 The 'pec' package for instance refers to to the score as the predicted error curve. 
 The mlr3proba package refers to the brier score as the 'surv.graf', based on Graf who initially modified the measure. 
 
-## Explanation of Method 
+## Brier Score: Adjustments for censored data
 
 The mean squared error in a nutshell is the incurred quadratic loss, studying the predicted and the true event status (Schoop et al.,2011).
-Graf et al. (1999) state that the "...expected brier score may be interpreted as a mean squared error of prediction when the estimated prob, which take values in interval [0,1] are viewed as prediction of event status at t*,I(T>t*) in {0,1}."
+Graf et al. (1999) state that the "...expected brier score may be interpreted as a mean squared error of prediction when the estimated probability, which take values in interval [0,1] are viewed as prediction of event status at $t^*, I(T>t^*)$."
 The brier score is dependent on the evaluation time.
 By introducing a reweighing scheme, one derives quantities that are independent on the censoring distribution and hence suitable for censored data (Graf et al.,1999).
 To get a comprehensive time dependent model performance, multiple time points have to be studied.
@@ -181,14 +184,99 @@ For the individual at time t:
 $$L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})]$$
 
 Where L is the loss function, S is the survival function, G is IPCW estimate of the censored survival function P(C*>t).
-Typically, one makes the assumption that the censored data is missing data at random, or rephased our survival times are independent.
+Typically, one makes the assumption that the censored data is missing data at random, or re-phased our survival times are independent.
 
 Integrated population mean version: 
 
 $$L(S) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*)$$
 where: N is the number of observations , $S_i$ is the predicted survival function, t is the time of the event, $t^*$ the time before event
 
-## mlr3 implementation 
+## Implementation 
+
+\footnotesize
+```{r}
+set.seed(123)
+library("prodlim")
+library("survival")
+library("pec")
+dat <- SimSurv(10000)
+models <- list(
+  "Cox.X1" = coxph(Surv(time, status) ~ X1,
+    data = dat, x = TRUE, y = TRUE),
+  "Cox.X2" = coxph(Surv(time, status) ~ X2,
+    data = dat, x = TRUE, y = TRUE),
+  "Cox.X1.X2" = coxph(Surv(time, status) ~ X1 + X2,
+    data = dat, x = TRUE, y = TRUE))
+```
+
+\footnotesize
+```{r}
+perror <- pec(
+  object = models,
+  formula = Surv(time, status) ~ 1, # ,~X1 +X2, for cox
+  data = dat, exact = TRUE, cens.model = "marginal", # .model="cox"
+  splitMethod = "none",
+  B = 0)
+```
+
+\footnotesize
+```{r}
+calPlot(models)
+```
+\footnotesize
+```{r}
+summary(perror, times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1)))
+```
+
+Next we can plot our prediction error over time. 
+
+```{r}
+plot(perror, ylim = c(0,1))
+```
+
+Now, we can get a detailed look into the integrated scores, using cumulative time.
+
+\footnotesize
+```{r, out.width="200px"}
+crps(perror, times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1)))
+```
+
+
+
+\footnotesize
+```{r}
+cindex <- cindex(models,
+  formula = Surv(time, status) ~ 1,
+  cens.model = "marginal", data = dat,
+  eval.times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1)))
+```
+
+\footnotesize
+```{r}
+summary(cindex)
+```
+
+\footnotesize
+```{r, include =F}
+library("mlr3")
+library("mlr3learners")
+library("mlr3proba")
+library("mlr3viz")
+
+TaskSurv$new(
+  id = "interval_censored", backend = survival::bladder2[, -c(1, 7)],
+  time = "start", time2 = "stop", type = "interval2")
+task <- tsk("rats")
+learners <- lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
+measure <- msr("surv.graf") # for c-index you can use surv.cindex
+bmr <- benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 2)))
+# bmr$aggregate(measure)
+```
+
+\footnotesize
+```{r, fig.width= 3.5, fig.height=2.5}
+autoplot(bmr, measure = measure)
+```
 
 Sonabend et al. (2020) provide a package for the mlr3 framework, namely mlr3proba.
 An useful component is the benchmarking feature of different model evaluation measures.
@@ -273,4 +361,3 @@ At the core, studies separate between models that evaluate overall performance, 
 Both the c-index for discrimination, and the IBS for overall performance, are well established tools to undertake model evaluation.
 
 # References 
-
