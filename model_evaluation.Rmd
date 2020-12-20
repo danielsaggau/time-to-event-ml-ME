@@ -10,7 +10,7 @@ output:
    pdf_document:
     number_sections: true
 citation_package: --biblatex
-bibliography: [export.bib]
+bibliography: [final.bib]
 nocite: '@*'
 ---
 
@@ -29,67 +29,81 @@ library("prodlim")
 
 # Introduction 
 
-We don't always have full information on the events for all subjects in our dataset. 
-This is a common challenge of Time-to-Event studies, and referred to as censored data.
-Reasons for having censored data in our dataset can be manifold.
-One example would be that the study ends prior to the event occurring.
-This paper will illustrate some model evaluation metrics and respective modifications for Time-to-Event studies.
-Here, the focus is predominately on popular extensions of the loss function and the area under the curve(AUC), specifically drawing attention to the IBS and the concordance-index or in short c-index.
-Both methods use the inverse probability of the censoring weighted estimate (IPCW) for the censored data.
-The c-index does enjoy prominence due to interpretability and the ability to make insightful conclusions for individual subjects.
-Essentially,the c-index only considers discrimination, neglecting model calibration.
-When trying to measure discrimination alone, it is the most popular tool of choice.
-The integrated brier score is the preferable tool for model evaluation for overall performance looking specifically at machine learning methods given the relative importance of calibration in predictive modelling.
-With respect to the structure of this paper, there will first of all be a brief outline of fundamental concepts within survival analysis and model evaluation.
+We don't always have full information on the time when events occur for every subjects in our data. 
+This is a common challenge of Time-to-Event (TTE) studies, and referred to as censored data.
+Reasons for having censored data can be manifold.
+One reason could be that the study ends prior to the event taking place.
+This feature in our data makes it challenging to use classical model evaluation tools and require some modifcations.
+This paper focuses on popular extensions of the mean squared error and the area under the curve(AUC), specifically highlighting the IBS and the concordance-index or in short c-index.
+Both methods use the inverse probability of the censoring weighted estimate (IPCW) to approximate the censored data.
+The c-index does enjoy prominence due to it's interpretability.
+This score only measures discrimination and neglects model calibration.
+When trying to measure discrimination distinct from overall performance, it is the recommended tool of choice as suggested in the literature.
+For overall performance evaluation, the IBS is the most prominent metric.
+The trajectory of this paper is to provide a brief introduction into existing model evaluation tools for TTE studies.
+With respect to the structure of this paper, first of all there will be a brief outline of fundamental concepts within survival analysis and model evaluation.
 The subsequent sections devote special attention to the two dominant methods, the IBS and the c-index, also accounting for their practical implementation in R.
-Thereafter there is a discussion of these methods, also briefly followed by a short discourse to novel model evaluation tools focusing on clinical usefulness, namely decision curve analysis and Net Reclassification improvement.
+The section thereafter discusses of these methods, also briefly followed by a short discourse to novel model evaluation tools focusing on clinical usefulness.
+Here, the focus is on decision curve analysis and Net Reclassification improvement.
 Lastly, the conclusion will summarize core findings. 
 
-# Fundamental Ideas in Time-to-Event Studies 
+# Fundamental Concepts 
 
-Time-to-event studies (TTE) entail some similar components.
+## Concepts in Time-to-Event Studies
+
+Time-to-event studies (TTE) entail some basic common characteristics.
 Firstly, we have survival time 'T', the time before an event takes places.
-For every TTE study, we have a hazard function 'h'. 
+For every TTE study, we have a hazard function 'h'.
+Two popular hazard functions are the proportional hazard model e.g. the Cox-PH-Model and the non-parametric Hazard model such as the Kaplan-Meier Model (Gerds et al., 2006)
 Further, we can derive the cumulative hazard 'H'.
 Using 'H', we can derive the survival function S(t).
 The survival function defines the probability that the event has not happened at time point 't'.
-Survival is sometimes written as Pr[T > t] which is means we are looking at the probability of the (total) survival time 'T' being bigger or equal to our time point 't'.
-Frequently, rather than working with the hazards directly, one works with risk scores 'r'.
-
-When evaluating model performance, one needs to differentiate between the type of study at hand.
+Graf et al. (1999) refer to this as "*... the marginal probability of being event free at time t.*"
+Survival is sometimes written as Pr[T > t] which is can be read as the probability of the (total) survival time 'T' being bigger or equal to our time point 't' (Graf et al., 1999). \newline
+Looking deeper into common challenges of TTE-studies, censoring is one of the biggest problems for traditional methods.
+There are various types of censored data.
+The two most granular distinctions are right censored data and left censored data.
+On the one hand we have right censored data, data where e.g. the event did not take place yet and the real event takes place in the future.
+On the other hand we have left censored data, data where e.g. the event took place at a point between our specified time thresholds, not allowing us to record the exact time accordingly and thus the real event is in the past.  (Steyerberg et al., 2010; Fu & Simonoff, 2016)
+The methods in this paper focus on working with right censored data.\newline
+When working with TTE studies, one also needs to differentiate between the type of study at hand.
 In a clinical setting, a setting that frequently welcomes time to event studies, one distinguishes between diagnostic and prognostic studies.
 Diagnostic studies are concerned with the problem of how to classify a patient at that very point in time.
 In a clinical setting, we are often interested in having a model with very high true positive rates. 
-Prognostics on the other hand deals with predictive modeling were also accuracy becomes an eminent consideration. 
+Prognostics on the other hand deals with predictive modeling were also accuracy becomes an eminent consideration (Steyerberg et al., 2010).
 In the machine learning framework, we are predominately interested in prognostic studies.
+
+## Fundamental Concepts in Model Evaluation
 
 Further, we can disentangle the different components of model evaluation into various groups.
 Fundamentally, model evaluation focuses on discrimination and calibration.
+
 **Discrimination:**When controlling for discrimination, we are controlling for how well our model is handling subjects with outcomes as compared to subjects without outcomes. 
-Therefore, as the name suggest, we are testing how strong our model discriminates between subjects that incur an event versus subjects that don't. 
+Therefore, we are testing how strong our model discriminates between subjects that incur an event versus subjects that don't. 
 Perfect discrimination would imply that all our subjects with the outcome have higher scores than subjects that do not have an outcome.
 When solely using a discrimination centered evaluation tool, our predictive accuracy could be severely impaired, but as long as we discriminate correctly we would still measure a strong performance. 
-The most prominent summary score to evaluate discrimination for classification tasks is the area under the curve (AUC).\newline
-**Calibration**: Calibration deals with our predictive accuracy.
-The most prominent score to capture accuracy in classification tasks is the brier score, a modification of the mean squared error.\newline 
-A third more recent focus is the issue of clinical usefulness.
-Clinical usefulness is as the name suggests relevant for clinical research and henceforth of secondary focus here.\newline
+The most prominent summary scores to evaluate discrimination for classification tasks are the area under the curve (AUC) and generalized version of the AUC, the concordance-statistics. (Steyerberg et al., 2010; Cook, 2007).\newline
+**Calibration**: Calibration deals with the accuracy of our predictions.
+The most prominent score to capture accuracy in classification tasks is the brier score, a modification of the mean squared error (Assel et al., 2017; Gerds et al., 2006).
+\newline 
+**Clinical usefulness**:A third more recent consideration is the issue of clinical usefulness.
+Clinical usefulness is relevant for clinical research and henceforth of secondary focus here.\newline
 The subsequent sections will discuss the c-index and the IBS. 
-Both of these methods use the inverse probability of the censoring weight estimate (IPCW) for the censored data, facilitating time to event data.
-Additionally, the c-index also changes some common assumptions used in the AUC.
+Both of these methods use the inverse probability of the censoring weight estimate (IPCW) for the censored data, facilitating time to event data (Kvamme & Borgen, 2019; Antolini et al., 2005).
+For a more detailed introduction into IPCW see Kopper and Scheipl (2020).
+Additionally, the c-index also changes some common assumptions used in the AUC (Antolini et al., 2005).
 To follow understand where these methods, the focus will be what differentiates these methods from classical tools.
 
-## C-Index: Foundation
+# C-Index: Foundation
 
-The  Receiver Operating Characteristic Curve (ROC), the curve in the area under the curve (AUC) score, is an important model evaluation tool for discrimination, building the foundation for the c-index.
+The Receiver Operating Characteristic Curve (ROC), the curve in the area under the curve (AUC) score, is an important model evaluation tool for discrimination, building the foundation for the c-index.
 The ROC allows one to account for imbalanced label distribution and imbalanced misclassification costs.
-Because of these factors, we need to account for more than solely accuracy of our model.
-Boiling it down, we want to look at the model performance over various default thresholds rather than at a specific misclassification specification.
-Further, the ROC takes evaluates two factors namely sensitivity and specificity.
+Boiling it down, we want to look at the model performance over various default thresholds rather than at a specific misclassification specification (Cook, 2007).
+Further, the ROC takes evaluates two factors namely sensitivity and specificity. 
 
 **Sensitivity**:
-Firstly, sensitivity deals with values above the threshold among the subject group which do endure an event e.g. the subjects with diseases (Cook, N. 2007).
-Another common name for Sensitivity is the true positive rate.
+Firstly, sensitivity deals with values above the threshold among the subject group which do endure an event e.g. the subjects with diseases (Cook, 2007).
+Another common name for Sensitivity is the true positive rate:
 \newline
 $$
 TPF = \frac{TP}{TP+FN}\tag{1}
@@ -97,112 +111,121 @@ $$
 
 **Specificity**:
 Specificity deals with false negatives, hence patients with a disease we classify as not having any diseases.
-Another name for specificity is the true negative rate. 
+Another name for specificity is the true negative rate: 
 \newline
 $$
 TNR = \frac{TN}{TN+FP} \tag{2}
 $$
 
 The area under the curve ranges from 0.5 (no discrimination) to the maximum value of 1 (perfect discrimination).
-The concordance- index is the generalization of the ROC for survival data (Cook, N., 2007).
+The concordance- index is the generalization of the ROC for survival data (Cook, 2007).
 Concordance describes consistency while discordance can be understood as inconsistency.
-Essentially, the difference can be written down as follows:
+Essentially, the difference can be written down as done by Blanche et al. (2019):
 
 $$
 \mathrm{AUC = Pr(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t\: and \: j \: has\: event\: after \: t}) \tag{3}
 $$
 
-In the AUC, we need uncensored data, because we need information on both subjects.
-On the other hand, we would specify the C score as follows:
+In the AUC, we need uncensored data, because we need information on both subjects. (Blanche et al., 2019)
+Due to the fact that we deal need to be able to deal with censored data, we need to modify the AUC.
+
+## C-Index: Adjustments for censored data
+
+The AUC deals with different questions than the C-index (Khosla et al., 2010).
+Typically, the AUC deals with questions like whether an Individual is likely to have a stroke within the next t-years.
+The c-index on the other hand evaluates pairs and therefore evaluates whether individual A or B is more likely to have a stroke. 
+For further information, @blanche_c-index_2019 explicitly elaborate why one cannot use the c-index for t-year predictions.
+Their arguments boil down to the following consideration, namely that with a concordance-index we are comparing actual event times as opposed to the (time dependent) AUC which compares binary event status at time t.
+Therefore, we can firstly use a concordance statistics rather than an AUC, to accommodate some of the data.
+Paul Blanche et al. (2019) specify the C score as follows:
 
 $$
 \mathrm{C = Pr(Risk_t(i)> Risk_t(j)| i\: has\: event\: before\: t)} \tag{4}
 $$
 
-With the c-index, we only need one of two subjects to have an event taking place for the subject pair to be comparable.
-Due to the fact that we deal need to be able to deal with censored data, we need to modify the AUC.
+With Harrell's C, we only need one of two subjects to have an event taking place for the subject pair to be comparable.
+Harrell's C is one of the most popular concordances statistics.
 The c-statistic describes how well models rank case and non-case, using a rank correlation measure, based on Kendall's tau (Uno et al., 2011).
-In a general case, a score above the threshold of 0,8 would be considered a strong performance (Zhang et al.,2018).
-Irrespective, this strongly depends on the setting.
-In a clinical setting this rule of thumb wont always hold.
-A concordance pair is a pair that is consistent, henceforth subjects with higher risks have earlier events and subjects with lower risk scores translate in later event time points.
+What counts as a "good" score strongly depends on the setting at hand.
+In a clinical setting rules of thumb such as a score of ~ 0.8 good will not always hold. (Cook, 2007)
+A concordance pair is a pair that is consistent, henceforth subjects with higher risks have earlier events and subjects with lower risk scores translate in later event time points. (Antolini et al., 2005)
 
 $$
 \mathrm{\frac{Concordant\: Pairs}{Concordant\: Pairs + Discordant\: Pairs}} \tag{5}
 $$
 
-Together concordant pairs (consistent) and discordant pairs(inconsistent) are classified as everything that is comparable. 
-For subject pairs to be comparable, we need at least one of the two subjects to have an event. 
-
-### Differentiation
-
-The AUC deals with different questions than the C-index. 
-Typically, the AUC deals with questions like whether an Individual is likely to have a stroke within the next t-years.
-The c-index on the other hand evaluates pairs and therefore evaluates whether individual A or B is more likely to have a stroke.
-For further information, @blanche_c-index_2019 explicitly elaborate why one cannot use the c-index for t-year predictions.
-Their arguments boil down to the following mechanism, namely that with a concordance-index we are comparing actual event times as opposed to the (time dependent) AUC which compares binary event status at time t.
-
-### Modifications 
-
-Various modifications of the c-index have been in circulation, with Harell'c attracting the most attention.
-You can find this version in the pec package (function: 'cindex') and the survival package (function: 'survConcordance')
-**Population Score:** Uno et al.(2011) propose a modified c-statistic which is consistent for population concordance measures.
-This method is also very popular and can be found in the survAUC and the survC1 package. 
-Another popular method is the the integrated brier score, a score that controls for both discrimination and calibration.
-**Time Dependency:**For time dependent covariates, Antolini et al. (2005) propose a time dependent c-index.
+Together concordant pairs (consistent) and discordant pairs(inconsistent) are classified as everything that is comparable.
+For subject pairs to be comparable, we need at least one of the two subjects to have an event when working with Harell's C.
+Irrespective, we cannot always use all our data because we don't necessarily have all our data in comparable pairs, henceforth we still loose some data (Gerds et al., 2013).
+Packages such as 'pec' use a time dependent c-index proposed by Antolini et al. (2005).
 They use a unique definition of concordance, arguing that any event that is not in the data, is bound to take place at a later point than any event that is already in the dataset (right censoring).
-Their model considered the presence of a population feature rather than a shortcoming of the sample.
+Rather than omitting the unusable pairs as done with Harell's C, the time dependent c-index uses a weighting function, of which the IPCW is the most popular, to estimate the censored data (Wolbers et al., 2014).
+There are various functions that can be used to estimate the IPCW.
+In this paper we only look at the default method using Kaplan Meier - estimates for the censored data.
+Regardless of the model used, 3 assumptions for the IPCW need to hold for our estimates to be consistent: 
 
-## Brier Score: Foundation
+- have conditional independent censoring
+- have a correct specification of our censoring model 
+- our data to be right censored data 
 
-The Brier Score is the MSE for Classification.
-The MSE, the mean squared error, is a accuracy measure in a regression setting.
+For further illustration, see Gerds et al. (2013).
+Another notable mention was proposed by Uno et al.(2011) which suggested a modified c-statistic which is consistent for population concordance measures.
+This method is also very popular and can be found in the survAUC and the survC1 package. 
+
+# Brier Score: Foundation
+
+The MSE is the incurred quadratic loss (Sonabend et al.,2011).
+Further, it is a accuracy measure used in the regression setting.
 Mathematically, we can define the MSE as follows: 
 
 $$
 \mathrm{MSE}=\frac{1}{n}\sum^n_{i=1}(y^{(i)})-\hat{y}^{(i)})^2 \tag{6}
 $$
 
+Essentially, we are comparing actual and predicted scores of y and square their difference, giving each observation equal weight.
 Now, we need to make some changes when working with classifications.
-For the brier score, we are using a probability estimates $\hat{\pi}(x^{i})$ rather than estimates of y.
+The Brier Score is the MSE for Classification.
+For the Brier score, we are using a probability estimates $\hat{\pi}(x^{i})$ rather than estimates of y.
 
 $$
 \mathrm{BS}= \frac{1}{n}\sum^n_{i=1}(\hat{\pi}(x^{(i)})-y^{(i)})^2 \tag{7}
 $$ 
-
-Other terminology that you might encounter is the predicted error or mean squared loss function (Schoop et al.,2011; Gerds & Schumacher, 2006).
-The 'pec' package for instance refers to to the score as the predicted error curve. 
+Given that we are trying to get some insights into the calibration and accuracy, we need to use probabilities and cannot use raw classification labels.
+We use estimated predictions of the event status at the time points and values can range from 0 to 1  (Graf et al., 1999).
+The Brier scores is dependent on the evaluation time.
+Other terminology that you might encounter is the predicted error as seen in the 'pec' package.
 The mlr3proba package refers to the brier score as the 'surv.graf', based on Graf who initially modified the measure. 
+## Brier Score: Adjustments for censored data
 
-### Brier Score: Adjustments for censored data
-
-The mean squared error in a nutshell is the incurred quadratic loss, studying the predicted and the true event status (Schoop et al.,2011).
-Graf et al. (1999) state that the "...expected brier score may be interpreted as a mean squared error of prediction when the estimated probability, which take values in interval [0,1] are viewed as prediction of event status at $t^*, I(T>t^*)$."
-The brier score is dependent on the evaluation time.
-By introducing a reweighing scheme, one derives quantities that are independent on the censoring distribution and hence suitable for censored data (Graf et al.,1999).
-To get a comprehensive time dependent model performance, multiple time points have to be studied.
-
-For the individual at time t:
+Typically, one makes the assumption that the censored data is missing data at random, or re-phased our survival times are independent.
+We introduce a weighting scheme to estimate our censored data. 
+There are various different methods to do this, one of the most prominent being the IPCW estimates (Gerds and Schumacher, 2006).
+Gerds and Schumacher (2006) compare different estimators for the IPCW and recommend the usage of a Cox-PH model or a nonparametric allen-model given that these two estimators illustrated the most promising results.
+We are not just interested in the maximum time point, but also performance at different thresholds.
+It is common practice to use the 25th, 50th and 75th percentile quantile (Bender and Scheipl, 2018)
+For further specification see Gerds and Schumacher (2006).
+In the 'mlr3proba' package the loss function for the individual is defined using the definition given by Graf et al. (1999).
 
 $$
 L(S,t|t^*) = [(S(t^*)^2)I(t)\leq t^*, \delta =1)(\frac{1}{G(t)})] + [((1-S(t^*))^2)I(t>t^*)(\frac{1}{G(t^*)})] \tag{8} 
 $$
 
-Where L is the loss function, S is the survival function, G is IPCW estimate of the censored survival function P(C*>t).
-Typically, one makes the assumption that the censored data is missing data at random, or re-phased our survival times are independent.
-
-Integrated population mean version: 
+where L is the loss function, S is the survival function, G is IPCW estimate of the censored survival function $P(C*>t)$, N is the number of observations , $S_i$ is the predicted survival function, t is the time of the event, $t^*$ the time before event and $\delta$ is our indicator whether our data is censored or not.
+For the population score, the following notation is specified: 
 
 $$
 L(S) = \frac{1}{NT}\displaystyle\sum^N_{i=1}\displaystyle\sum ^T_{j=1}L(S_i,t_i|t^*) \tag{9}
 $$
-where: N is the number of observations , $S_i$ is the predicted survival function, t is the time of the event, $t^*$ the time before event
+
+Note that the method how the scores are integrated differs per package.
+E.g. in mlr3proba you can integrate via equal weights (method==1), or use difference between time points (method==2).
+The later is the more prominent method and used e.g. in the 'pec' package. (Sonabend et al., 2020)
 
 # Implementation
 
-For this illustration, simulation data is used by calling the SimSurv function.
+For this illustration, we are using simulation data provided by the 'SimSurv' function.
 In total, 3 different models are generated namely one with one variable (X1), one with a different variable (X2) and one model where we combine X1 and X2.
-\newline
+
 \footnotesize
 ```{r}
 set.seed(123)
@@ -218,30 +241,33 @@ models <- list("Cox.X1" = coxph(Surv(time, status) ~ X1,
     data = dat, x = TRUE, y = TRUE))
 ```
 \normalsize
+
 After setting a list with our different models, we can set up our model evaluation tools.
 
 ## Implementation: Integrated Brier Score
 
-Firstly, we can look at the IBS.
-To derive the IBS, we can separately call the Brier Score and specificy the method with which we will estimate the censored data.
-Here, we are using the default method,the Kaplan-Meier estimates, for the IPCW.
-\newline
+Firstly, we look at the IBS.
+To derive the IBS, we can first derive the Brier Score and specific the method with which we will estimate the censored data.
+Here, we are using the default method,the Kaplan-Meier estimates, for the IPCW (Gerds, 2020).
+
+
 \footnotesize
 ```{r}
 perror <- pec(
   object = models,
   formula = Surv(time, status) ~ 1, # ,~X1 +X2, for cox
-  data = dat, exact = TRUE, cens.model = "marginal", # .model="cox"
+  data = dat, exact = TRUE, cens.model = "marginal", 
   splitMethod = "none",
   B = 0)
 ```
 \normalsize
+
 Now, we can separately also look at the calibration of our model.
 The calibration plot looks at the frequencies of the survival function and compared the predicted survival probabilities.
 We can see that the third model is closest to the 45° line, thus the predictions are closest to the true survival frequencies.
-Irrespective, here the example is somewhat incomprehensible given how close the lines are and not as informative as comparing the actual scores at the different time points.
+Irrespective, here the example is somewhat incomprehensible given how close the lines are and not as informative as comparing the actual scores at the different time points (Gerds, 2020).
 
-```{r}
+```{r, fig.cap="Calibration Plot, plotting predicted probabilities against frequencies of observed scores"}
 calPlot(models)
 ```
 
@@ -250,8 +276,9 @@ Now looking at the summary statistics for our prediction error curve at differen
 Here we are examining the overall brier score and not only calibration.
 This is a score for calibration and discrimination combined.
 We can see that the third model has the lowest brier scores at all thresholds and henceforth the best performance.
-One should note that we looking at the score at different thresholds but this depiction is not synonymous with the IBS scores at the thresholds.
-\newline
+One should note that we looking at the score  of our training data at different thresholds this depiction is not synonymous with the IBS scores at the thresholds (Gerds, 2020).
+
+
 \footnotesize
 ```{r}
 summary(perror, times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1)))
@@ -260,29 +287,32 @@ summary(perror, times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1)))
 So, now we can visually also look at overall performance visually.
 One can plot our prediction error over time.
 A lower prediction error is better.
-Therefore, the third model, the blue line is lowest.
-\newline
-```{r}
+Therefore, the third model, the blue line is lowest (Gerds, 2020).
+
+
+```{r, fig.cap="Prediction Error Curve over time"}
 plot(perror, ylim = c(0,1))
 ```
 
 Now, we can get a detailed look into the integrated scores, using the cumulative prediction error curves.
 This 'crps' function is synonymous with the 'ibs' function and can be used to get the integrated brier score.
-We can display the scores at various thresholds.
-The same interpretation as for the brier score holds.
-\newline
+Again, we can display the scores at various thresholds of our training and the same interpretation as for the brier score holds (Gerds, 2020).
+
+
 \footnotesize
 ```{r, out.width="200px"}
 crps(perror, times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1)))
 ```
 \normalsize
+
 ## Implementation: Concordance Statistics
 
 We are using the same simulated data here for comparison.
 Here the 'cindex' function from the pec package is illustrated.
 A specification for the censored data is needed.
-Again, we are using the default settings, thus we are using the Kaplan-Meier-estimates.
-\newline
+Again, we are using the default settings, thus we are using the Kaplan-Meier-estimates (Gerds, 2020).
+
+
 \footnotesize
 ```{r}
 cindex <- cindex(models,
@@ -294,8 +324,9 @@ cindex <- cindex(models,
 Interpretation is reversed for the c-index.
 As a reminder, here we are looking at discrimination and not overall model performance.
 Essentially, we would do this when we want to study discrimination separately from overall performance.
-A score at 1 would describe a perfect model and a score of 0.5 would imply complete randomness.
-\newline
+A score at 1 would describe a perfect model and a score of 0.5 would imply complete randomness (Gerds, 2020).
+
+
 \footnotesize
 ```{r}
 summary(cindex)
@@ -305,14 +336,13 @@ summary(cindex)
 
 Lastly, we can also compare model performance in the mlr3 framework, using 'mlr3proba' (Sonabend et al., 2020).
 Not going into the details of the general usage of mlr3, here the focus is the implementation of model evalation tools.
-To specify the measure, we define the measure.
+To specify the measure, we need to define the measure.
 To use the IBS, we can use e.g. the 'surv.graf' measure and for the c-index we could use "surv.cindex".
 Various different versions of these measures exist in the framework, henceforth there are further options that wont be explored at this point.
 Special attention should be drawn to the fact that you need to specify how censored data is treated here. 
 E.g. the 'surv.logloss' function requires the user to specify how to treat the censored observations and the default is to ignore censored data.
-We can benchmark these results in a boxplot, using the 'autoplot' function.
-\newline
-\footnotesize
+We can benchmark these results in a boxplot, using the 'autoplot' function (Sonabend et al., 2020).
+
 ```{r, include =F}
 library("mlr3")
 library("mlr3learners")
@@ -337,12 +367,22 @@ bmr <- benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 2)))
 #' learners <- lrns(c("surv.coxph", "surv.kaplan", "surv.ranger"))
 #' measure <- msr("surv.graf") # for c-index you can use surv.cindex
 #' bmr <- benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 2)))
+```
 
+
+```{r,  fig.cap = "Evaluating Model Performance using the IBS"}
 autoplot(bmr, measure = measure)
 ```
-\normalsize
+
+As we can see, the random survival forest performs best.
+The Kaplan Meier model has the widest spread and the worst performance.
+The Cox-PH model has the slimmest spread, but performs slightly worse than the random survival forest model.
+As a reminder, we are interest in the different thresholds and not only want a single score.
+Henceforth, the boxplot representation is suitable for comparison.
 
 # Considerations
+
+After taking about the implementation, there are some important considerations that need to be evaluated.
 
 ## Considerations: C-index
 
@@ -354,58 +394,55 @@ Henceforth, this score provides insights enabling us to dissect the performance 
 **Disadvantages**: (1) Because we are reducing the ROC to a single score, we are losing the biggest advantage of the ROC, namely being able to examine the model performance for different misclassification scores.
 Henceforth, we are defying part of the purpose of the ROC namely plotting various misclassification rates without knowing the true misclassification rate, and averaging to one single score with less information on model performance.
 We basically average over all misclassification rates (Hand, 2009).
-(2) Prognostic studies need to account for the model accuracy which is measured by model calibration.
+(2) Prognostic studies usually should account for model calibration.
 Kattan and Gerds (2018), argue that model evaluation metrics needs to be able to differentiate between useless and harmful models.
 Harmful models are models that make severely wrong predictions (and some right ones) while useless models could e.g. always predict some level of prevalence. 
 Using a concordance statistic for prognostic studies is not advised.
 (3) For a more nuanced prevalence of a disease, the sensitivity is impaired (Cook, 2007). 
 Specificity is dependent on the data structure, but as suggested by Cook (2007), specificity is for instance affected by age, gender and the prevalence of concomitant risk factors.
-(4) Because c-statistics is based on ranks it is less sensitive than e.g. measures based on probabilities.
 
 ## Considerations: IBS
 
 **Advantages**: (1) The integrated brier score is a measure accounting for both discrimination and calibration separately.
 Essentially we are comparing two different things, once a tool to specifically look at discrimination (c-index) and secondly an overall performance measure.
-(2)  Further, the IBS has the ability to differentiate between useless and harmful models. 
-(3) Moreover, the c-index does not allow for t-year predictions. 
-For the IBS, we deal estimates specifically for a time-specified horizon.(Kattan and Gerds, 2018)
+(2) Further, the IBS has the ability to differentiate between useless and harmful models. 
+(3) Moreover, the IBS, deals with estimates specified for a time-horizon as opposed to the c-index where we cannot make t-year predictions. (Kattan and Gerds, 2018)
 
-**Disadvantages**:(1) Kattan and Gerds (2018) suggest that the evaluation is somewhat problematic.
-The benchmark of the different models are dependent on the overall prevalence of the event in our data set. 
+**Disadvantages**:(1) The benchmark of the different models are dependent on the overall prevalence of the event in our data set. 
 When working with data where the event rarely takes place, the benchmark is affected (Kattan and Gerds, 2018).
-(2) On the one hand, scores are affected by overall event risk.
-On the other hand, we also need a benchmark model for evaluation.
-Henceforth, the interpretation of the absolute scores is problematic.
-(3) Clinicians usually don't value the different components of model evaluation equally as their clinical consequences are not equivalent.
-Further, we are unable to see whether the implementation of the model is advisable in the first place.
+(2) On the other hand, we also need a benchmark model for evaluation.
+Henceforth, the interpretation of the absolute scores is problematic and less useful for e.g. clinicians.
+(3) Further, we are unable to see whether the implementation of the model is advisable in the first place.
 Steyerberg et al. (2010) argue that one is unable to detect whether the implementation will cause more harm than benefit.
-Therefore, some scholars have advocated for complementary tests accounting for clinical consequences.
+Therefore, some scholars have advocated for complementary tests accounting for clinical consequences (Cook, 2007)
 
-# Complemenary Model Evaluation Metrics
+## Novel Research: Net Reclassification improvement
 
-## Net Reclassification improvement
-
-Cook (2008) advocates for the usage of net reclassification improvement (NRI) and calibration tests for cross classified categories to study the clinical usefulness. 
+Cook (2007) advocates for the usage of net reclassification improvement (NRI) and calibration tests for cross classified categories to study the clinical usefulness. 
 While NRI is only a measure to study discrimination, it allows to account for the formation of categories based on clinical risk estimates.
-Henceforth, reclassification complements existing clinicians in practical applications as opposed to providing a dominant model evaluation tools.
-Integrated discrimination improvement (IDI) is equivalent to testing whether the regression coefficient in a model is equal to zero (Cook & Ridker , 2009).
-Cook  and Ridker (2009) point out that there is a dependency between reclassification measures and the categories used.
-Further they suggest that reclassification calibration statistic and NRI both may be useful to demonstrate the ability of new models and markers when altering risk strata.
+Henceforth, reclassification complements existing clinicians in practical applications as opposed to providing a dominant model evaluation tools. (Cook, 2010)
 
-## Decision Analysis Curve 
+## Novel Research: Decision Analysis Curve 
 
-Decision analysis curve enables the use of weights, allowing optimal decision making based on subjective preferences, embodied in a net benefit equation.
-Further Vickers et al. (2016) illustrate that harm is transformed, using an exchange rate to put harm and benefit on one scale.
-This exchange rate can be obtained by asking clinicians questions based on their subjective preferences such as how many patients they would have undergo a biopsy prior to finding a cancer or weighing the benefits of getting early findings as opposed to the cost of harmful further testing.
+Decision analysis curve enables the use of weights, allowing optimal decision making based on subjective preferences.
+Further Vickers et al. (2006) illustrate that harm is transformed, using an exchange rate to put harm and benefit on one scale.
+This exchange rate can be obtained by asking clinicians questions based on their subjective preferences.
 Together these elements build the net-benefit equation.
 Plotting different exchange rates with the net benefit equation, gives us the decision analysis curve. 
-The curves enable the practitioner the identification of the rage of threshold probabilities for when a model would be of value, providing information on the necessary benefits needed for a model to be useful and which of many models is optimal (Vickers, A., Elkin, E., 2006).
-One important consideration is that decision analysis curve is a complement, not a substitute to existing models (Vickers, A., Elkin, E., 2006).
+The curves enable the practitioner the identification of the rage of threshold probabilities for when a model would be of value.
+One important consideration is that decision analysis curve is also a complement, not a substitute to existing models (Vickers, A., Elkin, E., 2006).
 
 # Conclusion 
 
 Time-to-Event studies require adjusted model evaluation tools for censored survival data.
 At the core, studies separate between models that evaluate overall performance, discrimination and calibration.
 Both the c-index for discrimination, and the IBS for overall performance, are well established tools to undertake model evaluation.
+One should consider that the c-index is very interpretable, but simultaneously loses a lot of information compared to the AUC/ROC and ignores clinical usefulness.
+Blanche et al. (2019) emphasis that the c-index is not suitable for the same type of questions as the AUC.
+Further, the IBS provides more information on overall model performance than the c-index but is not as interpretable and neglects clinical usefulness.
+Irrespective, when evaluating machine learning models, it is recommended to consider both discrimination and calibration.
+Both of these tools are useful starting points when dealing with TTE studies.
+
 
 # References 
+
