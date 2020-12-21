@@ -58,7 +58,8 @@ Further, we can derive the cumulative hazard 'H'.
 Using 'H', we can derive the survival function S(t).
 The survival function defines the probability that the event has not happened at time point 't'.
 Graf et al. (1999) refer to this as "*... the marginal probability of being event free at time t.*"
-Survival is sometimes written as Pr[T > t] which is can be read as the probability of the (total) survival time 'T' being bigger or equal to our time point 't' (Graf et al., 1999). \newline
+Survival is sometimes written as Pr[T > t] which is can be read as the probability of the (total) survival time 'T' being bigger or equal to our time point 't' (Graf et al., 1999). 
+
 Looking deeper into common challenges of TTE-studies, censoring is one of the biggest problems for traditional methods.
 There are various types of censored data.
 The two most granular distinctions are right censored data and left censored data.
@@ -72,7 +73,7 @@ In a clinical setting, we are often interested in having a model with very high 
 Prognostics on the other hand deals with predictive modeling were also accuracy becomes an eminent consideration (Steyerberg et al., 2010).
 In the machine learning framework, we are predominately interested in prognostic studies.
 
-## Fundamental Concepts in Model Evaluation
+## Concepts in Model Evaluation
 
 Further, we can disentangle the different components of model evaluation into various groups.
 Traditionally, model evaluation focuses on discrimination and calibration.
@@ -93,7 +94,7 @@ For a more detailed introduction into IPCW see Kopper and Scheipl (2020).
 Additionally, the c-index also changes some common assumptions used in the AUC (Antolini et al., 2005).
 To fully understand these methods, the focus will be on what differentiates these methods from classical tools.
 
-# C-Index: Foundation
+# C-Index
 
 The Receiver Operating Characteristic Curve (ROC), the curve in the area under the curve (AUC) score, is an important model evaluation tool for discrimination, building the foundation for the c-index.
 The ROC allows one to account for imbalanced label distribution and imbalanced misclassification costs.
@@ -127,8 +128,6 @@ $$
 
 In the AUC, we need uncensored data, because we need information on both subjects. (Blanche et al., 2019)
 Due to the fact that we deal need to be able to deal with censored data, we need to modify the AUC.
-
-## C-Index: Adjustments for censored data
 
 The AUC deals with different questions than the C-index (Khosla et al., 2010).
 Typically, the AUC deals with questions like whether an Individual is likely to have a stroke within the next t-years.
@@ -170,7 +169,7 @@ For further illustration, see Gerds et al. (2013).
 Another notable mention was proposed by Uno et al.(2011) which suggested a modified c-statistic which is consistent for population concordance measures.
 This method is also very popular and can be found in the 'survAUC' and the 'survC1' package. 
 
-# Brier Score: Foundation
+# Brier Score
 
 The MSE is the incurred quadratic loss (Sonabend et al.,2011).
 Further, it is a accuracy measure used in the regression setting.
@@ -193,8 +192,6 @@ We use estimated predictions of the event status at the time points and values c
 The Brier scores is dependent on the evaluation time.
 Other terminology that you might encounter is the predicted error as seen in the 'pec' package.
 The mlr3proba package refers to the brier score as the 'surv.graf', based on Graf who initially modified the measure. 
-
-## Brier Score: Adjustments for censored data
 
 Typically, one makes the assumption that the censored data is missing data at random, or re-phased our survival times are independent.
 We introduce a weighting scheme to estimate our censored data. 
@@ -267,11 +264,11 @@ Now, we can separately also look at the calibration of our model.
 The calibration plot looks at the frequencies of the survival function and compared the predicted survival probabilities.
 We can see that the third model is closest to the 45° line, thus the predictions are closest to the true survival frequencies.
 Irrespective, here the example is somewhat incomprehensible given how close the lines are and not as informative as comparing the actual scores at the different time points (Gerds, 2020).
-\footnotesize
-```{r, fig.cap="Calibration Plot, plotting predicted probabilities against frequencies of observed scores"}
+
+```{r,  fig.cap = "Calibration Plot, plotting predicted probabilities against frequencies of observed scores"}
 calPlot(models)
 ```
-\normalsize
+
 Now looking at the summary statistics for our prediction error curve at different thresholds, we can see a more detailed performance depiction of our model.
 Here we are examining the overall brier score and not only calibration.
 This is a score for calibration and discrimination combined.
@@ -289,10 +286,11 @@ One can plot our prediction error over time.
 A lower prediction error is better.
 Therefore, the third model, the blue line is lowest (Gerds, 2020).
 
-\footnotesize
-```{r, fig.cap="Prediction Error Curve over time"}
+
+```{r,  fig.cap = "Prediction Error Curve over time"}
 plot(perror, ylim = c(0,1))
 ```
+
 \normalsize
 Now, we can get a detailed look into the integrated scores, using the cumulative prediction error curves.
 This 'crps' function is synonymous with the 'ibs' function and can be used to get the integrated brier score.
@@ -300,11 +298,11 @@ Again, we can display the scores at various thresholds of our training and the s
 
 
 \footnotesize
-```{r, out.width="200px"}
+```{r}
 crps(perror, times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1)))
 ```
-\normalsize
 
+\normalsize
 ## Implementation: Concordance Statistics
 
 We are using the same simulated data here for comparison.
@@ -313,12 +311,13 @@ A specification for the censored data is needed.
 Again, we are using the default settings, thus we are using the Kaplan-Meier-estimates (Gerds, 2020).
 
 \footnotesize
-```{r, out.width= max}
+```{r}
 cindex(models,
   formula = Surv(time, status) ~ 1,
   cens.model = "marginal", data = dat,
   eval.times = quantile(dat$time[dat$status == 1], c(.25, .5, .75, 1)))
 ```
+
 \normalsize
 Interpretation is reversed for the c-index.
 As a reminder, here we are looking at discrimination and not overall model performance.
@@ -363,10 +362,10 @@ bmr <- benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 2)))
 #' bmr <- benchmark(benchmark_grid(task, learners, rsmp("cv", folds = 2)))
 ```
 
-
 ```{r,  fig.cap = "Evaluating Model Performance using the IBS"}
 autoplot(bmr, measure = measure)
 ```
+
 \normalsize
 As we can see, the random survival forest performs best.
 The Kaplan Meier model has the widest spread and the worst performance.
@@ -410,13 +409,11 @@ Henceforth, the interpretation of the absolute scores is problematic and less us
 Steyerberg et al. (2010) argue that one is unable to detect whether the implementation will cause more harm than benefit.
 Therefore, some scholars have advocated for complementary tests accounting for clinical consequences (Cook, 2007)
 
-## Novel Research: Net Reclassification improvement
+## Novel Research
 
 Cook (2007) advocates for the usage of net reclassification improvement (NRI) and calibration tests for cross classified categories to study the clinical usefulness. 
 While NRI is only a measure to study discrimination, it allows to account for the formation of categories based on clinical risk estimates.
 Henceforth, reclassification complements existing clinicians in practical applications as opposed to providing a dominant model evaluation tools. (Cook, 2010)
-
-## Novel Research: Decision Analysis Curve 
 
 Decision analysis curve enables the use of weights, allowing optimal decision making based on subjective preferences.
 Further Vickers et al. (2006) illustrate that harm is transformed, using an exchange rate to put harm and benefit on one scale.
