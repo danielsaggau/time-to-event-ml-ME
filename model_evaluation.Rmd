@@ -2,7 +2,7 @@
 title: "**Model Evaluation for Time-to-Event Machine Learning**"
 author: 
 - "Author: Daniel Saggau — daniel.saggau@campus.lmu.de"
-- "Supervisor: Philipp Kopper, Andreas Bender"
+- "Supervisors: Philipp Kopper, Andreas Bender"
 - "*Department of Statistics*, Ludwig Maximilian University Munich, Germany"
 date: "21/12/2020"
 fontsize: 11pt
